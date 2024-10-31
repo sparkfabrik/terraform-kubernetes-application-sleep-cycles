@@ -20,8 +20,8 @@ This is a Terraform module to install a cron job on a Kubernetes cluster that us
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_cluster_role_name_prefix"></a> [cluster\_role\_name\_prefix](#input\_cluster\_role\_name\_prefix) | Name of the cluster role. | `string` | `"custom:stage-application-finops:controller"` | no |
-| <a name="input_configmap_name_prefix"></a> [configmap\_name\_prefix](#input\_configmap\_name\_prefix) | Name prefix for the Config Maps. | `string` | `"stage-application-finops-config"` | no |
+| <a name="input_cluster_role_name_prefix"></a> [cluster\_role\_name\_prefix](#input\_cluster\_role\_name\_prefix) | Name of the cluster role. | `string` | `"custom:application-sleep-cycles:controller"` | no |
+| <a name="input_configmap_name_prefix"></a> [configmap\_name\_prefix](#input\_configmap\_name\_prefix) | Name prefix for the Config Maps. | `string` | `"application-sleep-cycles-config"` | no |
 | <a name="input_create_namespace"></a> [create\_namespace](#input\_create\_namespace) | Create namespace. If false, the namespace must be created before using this module. | `bool` | `true` | no |
 | <a name="input_cronjob_timezone"></a> [cronjob\_timezone](#input\_cronjob\_timezone) | Timezone to use for the cron jobs. | `string` | `"Europe/Rome"` | no |
 | <a name="input_deployments_label_selector"></a> [deployments\_label\_selector](#input\_deployments\_label\_selector) | Label selector for the Deployments to be scaled. | `map(string)` | <pre>{<br>  "sparkfabrik.com/application-availability": "working-hours"<br>}</pre> | no |
@@ -29,11 +29,11 @@ This is a Terraform module to install a cron job on a Kubernetes cluster that us
 | <a name="input_k8s_labels"></a> [k8s\_labels](#input\_k8s\_labels) | Set of labels to apply to all resources. | `map(string)` | <pre>{<br>  "managed-by": "terraform",<br>  "scope": "finops"<br>}</pre> | no |
 | <a name="input_managed_namespaces"></a> [managed\_namespaces](#input\_managed\_namespaces) | List of namespaces where the controller should manage the scale of deployments. The namespaces defined here will be merged with the namespaces fetched by the `managed_namespaces_label_selector` variable. | `list(string)` | `[]` | no |
 | <a name="input_managed_namespaces_label_selector"></a> [managed\_namespaces\_label\_selector](#input\_managed\_namespaces\_label\_selector) | Label selector for the namespaces where the controller should manage the scale of deployments. The namespaces fetched by this selector will be merged with the `managed_namespaces` variable. | `map(string)` | <pre>{<br>  "sparkfabrik.com/stage-application-finops": "enabled"<br>}</pre> | no |
-| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace to create resources. | `string` | `"stage-application-finops"` | no |
-| <a name="input_role_binding_name"></a> [role\_binding\_name](#input\_role\_binding\_name) | Name of the role binding. | `string` | `"custom:stage-application-finops:controller"` | no |
-| <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Name of the service account. | `string` | `"stage-application-finops-sa"` | no |
+| <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace to create resources. | `string` | `"application-sleep-cycles"` | no |
+| <a name="input_role_binding_name"></a> [role\_binding\_name](#input\_role\_binding\_name) | Name of the role binding. | `string` | `"custom:application-sleep-cycles:controller"` | no |
+| <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Name of the service account. | `string` | `"application-sleep-cycles-sa"` | no |
 | <a name="input_working_hours_docker_image"></a> [working\_hours\_docker\_image](#input\_working\_hours\_docker\_image) | Docker image to use for the working hours CronJobs. | `string` | `"bitnami/kubectl:1.29"` | no |
-| <a name="input_working_hours_resource_prefix"></a> [working\_hours\_resource\_prefix](#input\_working\_hours\_resource\_prefix) | Prefix for the working hours resources. | `string` | `"stage-application-finops-working-hours"` | no |
+| <a name="input_working_hours_resource_prefix"></a> [working\_hours\_resource\_prefix](#input\_working\_hours\_resource\_prefix) | Prefix for the working hours resources. | `string` | `"application-sleep-cycles-working-hours"` | no |
 | <a name="input_working_hours_scale_down_schedule"></a> [working\_hours\_scale\_down\_schedule](#input\_working\_hours\_scale\_down\_schedule) | Cron schedule to scale down the Deployments. Remember that this is relative to the timezone defined in the `cronjob_timezone` variable. | `string` | `"0 20 * * *"` | no |
 | <a name="input_working_hours_scale_up_schedule"></a> [working\_hours\_scale\_up\_schedule](#input\_working\_hours\_scale\_up\_schedule) | Cron schedule to scale up the Deployments. Remember that this is relative to the timezone defined in the `cronjob_timezone` variable. | `string` | `"30 7 * * 1-5"` | no |
 | <a name="input_working_hours_suspend"></a> [working\_hours\_suspend](#input\_working\_hours\_suspend) | Suspend the CronJob. | `bool` | `false` | no |

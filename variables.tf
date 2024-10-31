@@ -7,7 +7,7 @@ variable "create_namespace" {
 variable "namespace" {
   description = "Namespace to create resources."
   type        = string
-  default     = "stage-application-finops"
+  default     = "application-sleep-cycles"
 }
 
 variable "k8s_labels" {
@@ -28,19 +28,19 @@ variable "k8s_additional_labels" {
 variable "service_account_name" {
   description = "Name of the service account."
   type        = string
-  default     = "stage-application-finops-sa"
+  default     = "application-sleep-cycles-sa"
 }
 
 variable "cluster_role_name_prefix" {
   description = "Name of the cluster role."
   type        = string
-  default     = "custom:stage-application-finops:controller"
+  default     = "custom:application-sleep-cycles:controller"
 }
 
 variable "role_binding_name" {
   description = "Name of the role binding."
   type        = string
-  default     = "custom:stage-application-finops:controller"
+  default     = "custom:application-sleep-cycles:controller"
 }
 
 variable "managed_namespaces" {
@@ -53,14 +53,14 @@ variable "managed_namespaces_label_selector" {
   description = "Label selector for the namespaces where the controller should manage the scale of deployments. The namespaces fetched by this selector will be merged with the `managed_namespaces` variable."
   type        = map(string)
   default = {
-    "sparkfabrik.com/stage-application-finops" : "enabled"
+    "sparkfabrik.com/application-sleep-cycles" : "enabled"
   }
 }
 
 variable "configmap_name_prefix" {
   description = "Name prefix for the Config Maps."
   type        = string
-  default     = "stage-application-finops-config"
+  default     = "application-sleep-cycles-config"
 }
 
 variable "deployments_label_selector" {
@@ -80,7 +80,7 @@ variable "cronjob_timezone" {
 variable "working_hours_resource_prefix" {
   description = "Prefix for the working hours resources."
   type        = string
-  default     = "stage-application-finops-working-hours"
+  default     = "application-sleep-cycles-working-hours"
 }
 
 variable "working_hours_docker_image" {
