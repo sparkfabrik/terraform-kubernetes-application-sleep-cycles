@@ -8,3 +8,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+---
+
+## [0.1.0] - 2024-11-05
+
+- First release.
