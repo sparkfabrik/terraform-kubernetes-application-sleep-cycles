@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  %{~ if length(labels) > 0 }
+  %{~ for lbl_key, lbl_value in labels }
+  labels:
+    ${lbl_key}: "${lbl_value}"
+  %{~ endfor ~}
+  %{~ endif ~}
+  name: ${name}
+  namespace: ${namespace}
+spec:
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  suspend: ${suspend}
+  schedule: "${schedule}"
+  timeZone: "${timezone}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - command:
+                - /app/working-hours.sh
+              env:
+                - name: GO_TO_REPLICAS
+                  value: ${go_to_replicas}
+              envFrom:
+                - configMapRef:
+                    name: ${config_map_app_env}
+              image: ${image}
+              imagePullPolicy: IfNotPresent
+              name: ${name}
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+              volumeMounts:
+                - name: app
+                  mountPath: /app
+          volumes:
+            - name: app
+              configMap:
+                defaultMode: 493 # 0755 in octal = 493 in decimal
+                name: ${config_map_app}
+          serviceAccountName: ${service_account}
+          restartPolicy: Never
