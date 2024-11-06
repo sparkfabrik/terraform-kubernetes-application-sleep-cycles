@@ -1,3 +1,10 @@
+# Get list of namespaces with a given label, where the controller should manage
+# the scale of deployments.
+data "kubernetes_resources" "managed_namespaces_by_labels" {
+  kind           = "Namespace"
+  api_version    = "v1"
+  label_selector = join(",", [for k, v in var.managed_namespaces_label_selector : "${k}=${v}"])
+}
 
 locals {
   k8s_full_labels = merge(
@@ -5,11 +12,14 @@ locals {
     var.k8s_additional_labels,
   )
 
-  final_namespace = var.create_namespace ? resource.kubernetes_namespace_v1.this[0].metadata[0].name : data.kubernetes_namespace_v1.this[0].metadata[0].name
+  cronjob_namespace = var.create_namespace ? var.namespace : data.kubernetes_namespace_v1.this[0].metadata[0].name
 
-  managed_namespaces = distinct(concat(var.managed_namespaces, var.additional_managed_namespaces))
+  managed_namespaces = distinct(concat(var.managed_namespaces, data.kubernetes_resources.managed_namespaces_by_labels.objects[*].metadata.name))
 }
 
+# The namespace in which we want to deploy the cronjob is created only if the
+# `create_namespace` variable is set to true.
+# Otherwise, the namespace must be created before using this module.
 resource "kubernetes_namespace_v1" "this" {
   count = var.create_namespace ? 1 : 0
 
@@ -30,10 +40,11 @@ data "kubernetes_namespace_v1" "this" {
   }
 }
 
+# The service account used by the cronjob to interact with the Kubernetes API.
 resource "kubernetes_service_account_v1" "this" {
   metadata {
     name      = var.service_account_name
-    namespace = local.final_namespace
+    namespace = local.cronjob_namespace
     labels    = local.k8s_full_labels
   }
 }
@@ -42,7 +53,7 @@ resource "kubernetes_secret_v1" "this" {
   metadata {
     # This is the prefix, used by the server, to generate a unique name ONLY IF the name field has not been provided. This value will also be combined with a unique suffix.
     generate_name = "${var.service_account_name}-"
-    namespace     = local.final_namespace
+    namespace     = local.cronjob_namespace
     labels        = local.k8s_full_labels
 
     annotations = {
@@ -54,6 +65,7 @@ resource "kubernetes_secret_v1" "this" {
   wait_for_service_account_token = true
 }
 
+# Service account permissions.
 resource "kubernetes_cluster_role_v1" "cluster_scoped" {
   metadata {
     name   = "${var.cluster_role_name_prefix}-cluster-scoped"
@@ -82,7 +94,7 @@ resource "kubernetes_cluster_role_binding_v1" "cluster_scoped" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account_v1.this.metadata[0].name
-    namespace = local.final_namespace
+    namespace = local.cronjob_namespace
   }
 }
 
@@ -105,6 +117,8 @@ resource "kubernetes_cluster_role_v1" "namespace_scoped" {
   }
 }
 
+# This role binding must be created in each namespace where the controller should
+# manage the scale of deployments.
 resource "kubernetes_role_binding_v1" "this" {
   for_each = toset(local.managed_namespaces)
 
@@ -123,14 +137,14 @@ resource "kubernetes_role_binding_v1" "this" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account_v1.this.metadata[0].name
-    namespace = local.final_namespace
+    namespace = local.cronjob_namespace
   }
 }
 
 resource "kubernetes_config_map_v1" "app_env" {
   metadata {
     name      = "${var.configmap_name_prefix}-env"
-    namespace = local.final_namespace
+    namespace = local.cronjob_namespace
     labels    = local.k8s_full_labels
   }
 
@@ -144,7 +158,7 @@ resource "kubernetes_config_map_v1" "app_env" {
 resource "kubernetes_config_map_v1" "app" {
   metadata {
     name      = "${var.configmap_name_prefix}-app"
-    namespace = local.final_namespace
+    namespace = local.cronjob_namespace
     labels    = local.k8s_full_labels
   }
 
@@ -160,7 +174,7 @@ resource "kubernetes_manifest" "scale_down" {
       "${path.module}/files/k8s-working-hours-cronjob.yaml.tftpl",
       {
         name               = "${var.working_hours_resource_prefix}-scale-down"
-        namespace          = local.final_namespace
+        namespace          = local.cronjob_namespace
         labels             = local.k8s_full_labels
         suspend            = var.working_hours_suspend
         schedule           = var.working_hours_scale_down_schedule
@@ -183,7 +197,7 @@ resource "kubernetes_manifest" "scale_up" {
       "${path.module}/files/k8s-working-hours-cronjob.yaml.tftpl",
       {
         name               = "${var.working_hours_resource_prefix}-scale-up"
-        namespace          = local.final_namespace
+        namespace          = local.cronjob_namespace
         labels             = local.k8s_full_labels
         suspend            = var.working_hours_suspend
         schedule           = var.working_hours_scale_up_schedule

@@ -20,7 +20,6 @@ This is a Terraform module to install a cron job on a Kubernetes cluster that us
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_managed_namespaces"></a> [additional\_managed\_namespaces](#input\_additional\_managed\_namespaces) | List of additional namespaces where the controller should manage the scale of deployments. | `list(string)` | `[]` | no |
 | <a name="input_cluster_role_name_prefix"></a> [cluster\_role\_name\_prefix](#input\_cluster\_role\_name\_prefix) | Name of the cluster role. | `string` | `"custom:application-sleep-cycles:controller"` | no |
 | <a name="input_configmap_name_prefix"></a> [configmap\_name\_prefix](#input\_configmap\_name\_prefix) | Name prefix for the Config Maps. | `string` | `"application-sleep-cycles-config"` | no |
 | <a name="input_create_namespace"></a> [create\_namespace](#input\_create\_namespace) | Create namespace. If false, the namespace must be created before using this module. | `bool` | `true` | no |
@@ -62,6 +61,7 @@ This is a Terraform module to install a cron job on a Kubernetes cluster that us
 | [kubernetes_secret_v1.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
 | [kubernetes_service_account_v1.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_account_v1) | resource |
 | [kubernetes_namespace_v1.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/data-sources/namespace_v1) | data source |
+| [kubernetes_resources.managed_namespaces_by_labels](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/data-sources/resources) | data source |
 
 ## Modules
 
