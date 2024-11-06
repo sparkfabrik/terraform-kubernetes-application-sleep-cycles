@@ -1,6 +1,6 @@
 output "namespace" {
   description = "Namespace where the descheduler is installed."
-  value       = local.final_namespace
+  value       = local.cronjob_namespace
 }
 
 output "k8s_full_labels" {

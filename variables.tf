@@ -50,7 +50,7 @@ variable "managed_namespaces" {
 }
 
 variable "managed_namespaces_label_selector" {
-  description = "Label selector for the namespaces where the controller should manage the scale of deployments. The namespaces fetched by this selector will be merged with the `managed_namespaces` variable."
+  description = "Label selector for the namespaces where the controller should manage the scale of deployments. The namespaces fetched by this selector will be merged with the `managed_namespaces` variable. **WARNING:** remember that if the labels specified here are added to new namespaces, the module will send the Terraform state into drift, as the list of namespaces is retrieved dynamically. You must then re-apply your Terraform configuration to fix the drift.."
   type        = map(string)
   default = {
     "sparkfabrik.com/application-sleep-cycles" : "enabled"

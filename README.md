@@ -28,7 +28,7 @@ This is a Terraform module to install a cron job on a Kubernetes cluster that us
 | <a name="input_k8s_additional_labels"></a> [k8s\_additional\_labels](#input\_k8s\_additional\_labels) | Set of additional labels to apply to all resources. | `map(string)` | `{}` | no |
 | <a name="input_k8s_labels"></a> [k8s\_labels](#input\_k8s\_labels) | Set of labels to apply to all resources. | `map(string)` | <pre>{<br>  "managed-by": "terraform",<br>  "scope": "finops"<br>}</pre> | no |
 | <a name="input_managed_namespaces"></a> [managed\_namespaces](#input\_managed\_namespaces) | List of namespaces where the controller should manage the scale of deployments. The namespaces defined here will be merged with the namespaces fetched by the `managed_namespaces_label_selector` variable. | `list(string)` | `[]` | no |
-| <a name="input_managed_namespaces_label_selector"></a> [managed\_namespaces\_label\_selector](#input\_managed\_namespaces\_label\_selector) | Label selector for the namespaces where the controller should manage the scale of deployments. The namespaces fetched by this selector will be merged with the `managed_namespaces` variable. | `map(string)` | <pre>{<br>  "sparkfabrik.com/stage-application-finops": "enabled"<br>}</pre> | no |
+| <a name="input_managed_namespaces_label_selector"></a> [managed\_namespaces\_label\_selector](#input\_managed\_namespaces\_label\_selector) | Label selector for the namespaces where the controller should manage the scale of deployments. The namespaces fetched by this selector will be merged with the `managed_namespaces` variable. **WARNING:** remember that if the labels specified here are added to new namespaces, the module will send the Terraform state into drift, as the list of namespaces is retrieved dynamically. You must then re-apply your Terraform configuration to fix the drift.. | `map(string)` | <pre>{<br>  "sparkfabrik.com/application-sleep-cycles": "enabled"<br>}</pre> | no |
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace to create resources. | `string` | `"application-sleep-cycles"` | no |
 | <a name="input_role_binding_name"></a> [role\_binding\_name](#input\_role\_binding\_name) | Name of the role binding. | `string` | `"custom:application-sleep-cycles:controller"` | no |
 | <a name="input_service_account_name"></a> [service\_account\_name](#input\_service\_account\_name) | Name of the service account. | `string` | `"application-sleep-cycles-sa"` | no |
@@ -61,6 +61,7 @@ This is a Terraform module to install a cron job on a Kubernetes cluster that us
 | [kubernetes_secret_v1.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/secret_v1) | resource |
 | [kubernetes_service_account_v1.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/resources/service_account_v1) | resource |
 | [kubernetes_namespace_v1.this](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/data-sources/namespace_v1) | data source |
+| [kubernetes_resources.managed_namespaces_by_labels](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs/data-sources/resources) | data source |
 
 ## Modules
 
