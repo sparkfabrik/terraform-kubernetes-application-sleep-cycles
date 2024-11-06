@@ -6,6 +6,8 @@ locals {
   )
 
   final_namespace = var.create_namespace ? resource.kubernetes_namespace_v1.this[0].metadata[0].name : data.kubernetes_namespace_v1.this[0].metadata[0].name
+
+  managed_namespaces = distinct(concat(var.managed_namespaces, var.additional_managed_namespaces))
 }
 
 resource "kubernetes_namespace_v1" "this" {
@@ -38,6 +40,7 @@ resource "kubernetes_service_account_v1" "this" {
 
 resource "kubernetes_secret_v1" "this" {
   metadata {
+    # This is the prefix, used by the server, to generate a unique name ONLY IF the name field has not been provided. This value will also be combined with a unique suffix.
     generate_name = "${var.service_account_name}-"
     namespace     = local.final_namespace
     labels        = local.k8s_full_labels
@@ -103,7 +106,7 @@ resource "kubernetes_cluster_role_v1" "namespace_scoped" {
 }
 
 resource "kubernetes_role_binding_v1" "this" {
-  for_each = toset(var.managed_namespaces)
+  for_each = toset(local.managed_namespaces)
 
   metadata {
     name      = var.role_binding_name
