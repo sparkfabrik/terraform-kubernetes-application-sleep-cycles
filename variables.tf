@@ -57,18 +57,50 @@ variable "managed_namespaces_label_selector" {
   }
 }
 
-variable "configmap_name_prefix" {
-  description = "Name prefix for the Config Maps."
-  type        = string
-  default     = "application-sleep-cycles-config"
+#aggiungere variabili per protected namespaces
+variable "protected_namespaces" {
+  description = "List of namespaces where the controller should not manage the scale of deployments. Use additional_protected_namespaces to add custom protected namespaces."
+  type        = list(string)
+  default     = ["kube-node-lease", "kube-public", "kube-system", "gmp-system", "gmp-public"]
 }
 
-variable "deployments_label_selector" {
-  description = "Label selector for the Deployments to be scaled."
+variable "additional_protected_namespaces" {
+  description = "List of additional namespaces where the controller should not manage the scale of deployments."
+  type        = list(string)
+  default     = []
+}
+
+# @TODO: at next breaking rename this to managed_namespaces_all_label_selector_for_working_hours
+variable "managed_namespaces_all_label_selector" {
+  description = "Label selector for all resources in the namespaces where the controller should manage the scale of deployments. The namespace must be labelled as enabled."
   type        = map(string)
   default = {
     "sparkfabrik.com/application-availability" : "working-hours"
   }
+}
+
+# @TODO: at next breaking rename this to deployments_label_selector_for_working_hours
+variable "deployments_label_selector" {
+  description = "Label selector for the Deployments to be scaled during working-hours."
+  type        = map(string)
+  default = {
+    "sparkfabrik.com/application-availability" : "working-hours"
+  }
+}
+
+# @TODO: at next breaking rename this to statefulsets_label_selector_for_working_hours
+variable "statefulsets_label_selector" {
+  description = "Label selector for the Statefulsets to be scaled during working-hours."
+  type        = map(string)
+  default = {
+    "sparkfabrik.com/application-availability" : "working-hours"
+  }
+}
+
+variable "configmap_name_prefix" {
+  description = "Name prefix for the Config Maps."
+  type        = string
+  default     = "application-sleep-cycles-config"
 }
 
 variable "cronjob_timezone" {
