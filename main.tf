@@ -148,7 +148,7 @@ resource "kubernetes_config_map_v1" "app_env" {
   }
 
   data = {
-    "NAMESPACES" : join(",", var.managed_namespaces),
+    "NAMESPACES" : join(",", local.managed_namespaces),
     "PROTECTED_NAMESPACES" : join(",", local.protected_namespaces),
     "NAMESPACES_LABEL_SELECTOR" : join(",", [for k, v in var.managed_namespaces_label_selector : "${k}=${v}"]),
     "NAMESPACES_ALL_LABEL_SELECTOR" : join(",", [for k, v in var.managed_namespaces_all_label_selector : "${k}=${v}"]),
