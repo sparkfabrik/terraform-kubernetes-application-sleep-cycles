@@ -57,6 +57,15 @@ variable "managed_namespaces_label_selector" {
   }
 }
 
+# @TODO: at next breaking rename this to managed_namespaces_all_label_selector_for_working_hours
+variable "managed_namespaces_all_label_selector" {
+  description = "Label selector for all resources in the namespaces where the controller should manage the scale of deployments. The namespace must have `managed_namespaces_label_selector` set."
+  type        = map(string)
+  default = {
+    "sparkfabrik.com/application-availability" : "working-hours"
+  }
+}
+
 #aggiungere variabili per protected namespaces
 variable "protected_namespaces" {
   description = "List of namespaces where the controller should not manage the scale of deployments. Use additional_protected_namespaces to add custom protected namespaces."
@@ -68,15 +77,6 @@ variable "additional_protected_namespaces" {
   description = "List of additional namespaces where the controller should not manage the scale of deployments."
   type        = list(string)
   default     = []
-}
-
-# @TODO: at next breaking rename this to managed_namespaces_all_label_selector_for_working_hours
-variable "managed_namespaces_all_label_selector" {
-  description = "Label selector for all resources in the namespaces where the controller should manage the scale of deployments. The namespace must be labelled as enabled."
-  type        = map(string)
-  default = {
-    "sparkfabrik.com/application-availability" : "working-hours"
-  }
 }
 
 # @TODO: at next breaking rename this to deployments_label_selector_for_working_hours
