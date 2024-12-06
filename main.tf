@@ -15,6 +15,8 @@ locals {
   cronjob_namespace = var.create_namespace ? var.namespace : data.kubernetes_namespace_v1.this[0].metadata[0].name
 
   managed_namespaces = distinct(concat(var.managed_namespaces, data.kubernetes_resources.managed_namespaces_by_labels.objects[*].metadata.name))
+
+  protected_namespaces = distinct(concat(var.protected_namespaces, var.additional_protected_namespaces))
 }
 
 # The namespace in which we want to deploy the cronjob is created only if the
@@ -106,26 +108,23 @@ resource "kubernetes_cluster_role_v1" "namespace_scoped" {
 
   rule {
     api_groups = ["apps"]
-    resources  = ["deployments"]
+    resources  = ["deployments", "statefulsets"]
     verbs      = ["get", "list"]
   }
 
   rule {
     api_groups = ["apps"]
-    resources  = ["deployments/scale"]
+    resources  = ["deployments/scale", "statefulsets/scale"]
     verbs      = ["update", "patch"]
   }
 }
 
 # This role binding must be created in each namespace where the controller should
 # manage the scale of deployments.
-resource "kubernetes_role_binding_v1" "this" {
-  for_each = toset(local.managed_namespaces)
-
+resource "kubernetes_cluster_role_binding_v1" "this" {
   metadata {
-    name      = var.role_binding_name
-    namespace = each.value
-    labels    = local.k8s_full_labels
+    name   = var.role_binding_name
+    labels = local.k8s_full_labels
   }
 
   role_ref {
@@ -149,9 +148,12 @@ resource "kubernetes_config_map_v1" "app_env" {
   }
 
   data = {
-    "NAMESPACES" : join(",", var.managed_namespaces),
+    "NAMESPACES" : join(",", local.managed_namespaces),
+    "PROTECTED_NAMESPACES" : join(",", local.protected_namespaces),
     "NAMESPACES_LABEL_SELECTOR" : join(",", [for k, v in var.managed_namespaces_label_selector : "${k}=${v}"]),
+    "NAMESPACES_ALL_LABEL_SELECTOR" : join(",", [for k, v in var.managed_namespaces_all_label_selector : "${k}=${v}"]),
     "DEPLOYMENTS_LABEL_SELECTOR" : join(",", [for k, v in var.deployments_label_selector : "${k}=${v}"]),
+    "STATEFULSETS_LABEL_SELECTOR" : join(",", [for k, v in var.statefulsets_label_selector : "${k}=${v}"]),
   }
 }
 
