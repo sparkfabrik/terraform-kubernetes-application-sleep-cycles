@@ -16,8 +16,8 @@ filter_namespaces() {
   # NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}")
   # Without warnings:
   # NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}" 1)
-  local protected_namespaces="$1"
-  local namespaces_to_filter="$2"
+  local protected_namespaces="${1}"
+  local namespaces_to_filter="${2}"
   local no_warning=${3:-0}
   local filtered_namespaces="${namespaces_to_filter}"
   local filtered_out=""
