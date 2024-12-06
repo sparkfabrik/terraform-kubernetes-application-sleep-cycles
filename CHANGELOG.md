@@ -9,7 +9,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ---
-## [0.1.0] - 2024-12-06
+
+## [0.2.0] - 2024-12-06
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/0.1.0...0.2.0)
 
@@ -17,9 +18,6 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Add management of statefulsets sleep cycle
 - Add management of all resources in a namespace
 - Refactor working-hours.sh script for better maintainability 
-
----
-
 
 ## [0.1.0] - 2024-11-06
 
