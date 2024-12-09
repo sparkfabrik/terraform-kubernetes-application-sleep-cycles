@@ -94,7 +94,7 @@ resource "kubernetes_cluster_role_v1" "cluster_scoped" {
 
 resource "kubernetes_cluster_role_binding_v1" "cluster_scoped" {
   metadata {
-    name   = var.role_binding_name
+    name   = var.cluster_role_binding_name
     labels = local.k8s_full_labels
   }
 
