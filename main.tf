@@ -79,33 +79,6 @@ resource "kubernetes_cluster_role_v1" "cluster_scoped" {
     resources  = ["namespaces"]
     verbs      = ["get", "list"]
   }
-}
-
-resource "kubernetes_cluster_role_binding_v1" "cluster_scoped" {
-  metadata {
-    name   = var.role_binding_name
-    labels = local.k8s_full_labels
-  }
-
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = kubernetes_cluster_role_v1.cluster_scoped.metadata[0].name
-  }
-
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account_v1.this.metadata[0].name
-    namespace = local.cronjob_namespace
-  }
-}
-
-resource "kubernetes_cluster_role_v1" "namespace_scoped" {
-  metadata {
-    name   = "${var.cluster_role_name_prefix}-namespace-scoped"
-    labels = local.k8s_full_labels
-  }
-
   rule {
     api_groups = ["apps"]
     resources  = ["deployments", "statefulsets"]
@@ -119,18 +92,16 @@ resource "kubernetes_cluster_role_v1" "namespace_scoped" {
   }
 }
 
-# This role binding must be created in each namespace where the controller should
-# manage the scale of deployments.
-resource "kubernetes_cluster_role_binding_v1" "this" {
+resource "kubernetes_cluster_role_binding_v1" "cluster_scoped" {
   metadata {
-    name   = var.role_binding_name
+    name   = var.cluster_role_binding_name
     labels = local.k8s_full_labels
   }
 
   role_ref {
     api_group = "rbac.authorization.k8s.io"
     kind      = "ClusterRole"
-    name      = kubernetes_cluster_role_v1.namespace_scoped.metadata[0].name
+    name      = kubernetes_cluster_role_v1.cluster_scoped.metadata[0].name
   }
 
   subject {

@@ -37,8 +37,8 @@ variable "cluster_role_name_prefix" {
   default     = "custom:application-sleep-cycles:controller"
 }
 
-variable "role_binding_name" {
-  description = "Name of the role binding."
+variable "cluster_role_binding_name" {
+  description = "Name of the cluster role binding."
   type        = string
   default     = "custom:application-sleep-cycles:controller"
 }
