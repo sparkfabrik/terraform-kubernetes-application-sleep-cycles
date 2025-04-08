@@ -1,0 +1,47 @@
+KIND_CLUSTER_NAME ?= application-sleep-cycles
+
+kind-create-cluster:
+	@./tests/scripts/kind-create-cluster.sh
+	@$(MAKE) kind-save-kubeconfig
+
+kind-delete-cluster:
+	@./tests/scripts/kind-delete-cluster.sh
+
+kind-save-kubeconfig:
+	@./tests/scripts/kind-generate-kubeconfig.sh
+
+check-context:
+	@if [ "$$(kubectl config current-context)" != "kind-$(KIND_CLUSTER_NAME)" ]; then echo "The current context is not kind-$(KIND_CLUSTER_NAME). Please switch to the correct context."; exit 1; fi
+
+deploy-resources: check-context
+	kubectl apply -f ./tests/manifests/
+
+terraform-cli:
+	@docker run --rm -it --entrypoint ash \
+		-v "$$(pwd):/app" \
+		-w /app/tests/terraform \
+		-u $$(id -u):$$(id -g) \
+		-h terraform-cli \
+		--net=host \
+		hashicorp/terraform -il
+
+exec-node-drain: check-context
+	@kubectl -n application-sleep-cycles delete job application-sleep-cycles-drain-cronjob-manual || true
+	@kubectl -n application-sleep-cycles create job --from=cronjob/application-sleep-cycles-drain-cronjob application-sleep-cycles-drain-cronjob-manual
+
+exec-terminating-pods: check-context
+	@kubectl -n application-sleep-cycles delete job application-sleep-cycles-terminating-pods-cronjob-manual || true
+	@kubectl -n application-sleep-cycles create job --from=cronjob/application-sleep-cycles-terminating-pods-cronjob application-sleep-cycles-terminating-pods-cronjob-manual
+
+patch-cronjob:
+	@kubectl -n application-sleep-cycles patch cronjob application-sleep-cycles-drain-cronjob --type='merge' -p '{"spec":{"jobTemplate":{"spec":{"template":{"spec":{"nodeSelector":{"name": "control-plane"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Exists","effect":"NoSchedule"}]}}}}}}'
+	@kubectl -n application-sleep-cycles patch cronjob application-sleep-cycles-terminating-pods-cronjob --type='merge' -p '{"spec":{"jobTemplate":{"spec":{"template":{"spec":{"nodeSelector":{"name": "control-plane"},"tolerations":[{"key":"node-role.kubernetes.io/control-plane","operator":"Exists","effect":"NoSchedule"}]}}}}}}'
+
+application-pod-deploy: check-context
+	@kubectl apply -f ./tests/manifests/application.yaml
+
+application-pod-shell: check-context
+	@kubectl -n application-sleep-cycles exec -it application-test -- bash
+
+application-pod-delete: check-context
+	@kubectl -n application-sleep-cycles delete --force --grace-period 0 pod application-test

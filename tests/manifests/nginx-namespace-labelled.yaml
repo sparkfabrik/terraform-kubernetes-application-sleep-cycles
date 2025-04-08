@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-namespace-labelled
+  name: nginx-namespace-labelled
+  namespace: nginx-namespace-labelled
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-namespace-labelled
+  template:
+    metadata:
+      labels:
+        app: nginx-namespace-labelled
+    spec:
+      containers:
+        - image: nginx:alpine-slim
+          name: nginx-namespace-labelled
+          imagePullPolicy: IfNotPresent
