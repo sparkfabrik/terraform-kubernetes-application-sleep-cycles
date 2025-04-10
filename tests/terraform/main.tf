@@ -5,7 +5,11 @@ provider "kubernetes" {
 module "application_sleep_cycles" {
   source = "../../"
 
-  managed_namespaces_label_selector = {
+  additional_protected_namespaces = [
+    "local-path-storage"
+  ]
+
+  working_hours_managed_namespaces_label_selector = {
     "sparkfabrik.com/application-sleep-cycles" : "enabled"
   }
 
@@ -22,4 +26,9 @@ module "application_sleep_cycles" {
       "name" : "worker2"
     }
   ]
+
+  working_hours_all_namespaces = true
+  working_hours_all_namespaces_excluded_resources_label_selector = {
+    "always_on" : null,
+  }
 }

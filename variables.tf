@@ -74,33 +74,43 @@ variable "working_hours_enabled" {
   default     = true
 }
 
-# @TODO: at next breaking rename this to working_hours_managed_namespaces
-variable "managed_namespaces" {
-  description = "List of namespaces where the controller should manage the scale of deployments. The namespaces defined here will be merged with the namespaces fetched by the `managed_namespaces_label_selector` variable."
+variable "working_hours_all_namespaces" {
+  description = "Enable working hours for all resources in all namespaces (except the ones defined in the `protected_namespaces` variable). If set to true, the `working_hours_managed_namespaces`, `working_hours_managed_namespaces_label_selector` and `working_hours_managed_namespaces_all_label_selector` variables will be ignored. The `protected_namespaces` variable will still be used to protect the namespaces where the controller should not manage the scale of resources. The `working_hours_all_namespaces_excluded_resources_label_selector` variable will be used to protect resources running in a non-protected namespace which should not be scaled down/up."
+  type        = bool
+  default     = false
+}
+
+variable "working_hours_all_namespaces_excluded_resources_label_selector" {
+  description = "Label selector used to exclude resources (deployments and statefulsets) which should not be scaled down/up when `working_hours_all_namespaces` is set to true. The negation of the label selector will be automatically applied, so using `sparkfabrik.com/always-on=true` will protect the resources with this label (`-l '!sparkfabrik.com/always-on=true'`). Use `null` as label value to consider only the label presence."
+  type        = map(string)
+  default = {
+    "sparkfabrik.com/always-on" : "true"
+  }
+}
+
+variable "working_hours_managed_namespaces" {
+  description = "List of namespaces where the controller should manage the scale of deployments. The namespaces defined here will be merged with the namespaces fetched by the `working_hours_managed_namespaces_label_selector` variable."
   type        = list(string)
   default     = []
 }
 
-# @TODO: at next breaking rename this to working_hours_managed_namespaces_label_selector
-variable "managed_namespaces_label_selector" {
-  description = "Label selector for the namespaces where the controller should manage the scale of deployments. The namespaces fetched by this selector will be merged with the `managed_namespaces` variable. **WARNING:** remember that if the labels specified here are added to new namespaces, the module will send the Terraform state into drift, as the list of namespaces is retrieved dynamically. You must then re-apply your Terraform configuration to fix the drift."
+variable "working_hours_managed_namespaces_label_selector" {
+  description = "Label selector for the namespaces where the controller should manage the scale of deployments. The namespaces fetched by this selector will be merged with the `working_hours_managed_namespaces` variable. **WARNING:** remember that if the labels specified here are added to new namespaces, the module will send the Terraform state into drift, as the list of namespaces is retrieved dynamically. You must then re-apply your Terraform configuration to fix the drift."
   type        = map(string)
   default = {
     "sparkfabrik.com/application-sleep-cycles" : "enabled"
   }
 }
 
-# @TODO: at next breaking rename this to working_hours_managed_namespaces_all_label_selector
-variable "managed_namespaces_all_label_selector" {
-  description = "Label selector for all resources in the namespaces where the controller should manage the scale of deployments. The namespace must have `managed_namespaces_label_selector` set."
+variable "working_hours_managed_namespaces_all_label_selector" {
+  description = "Label selector for all resources in the namespaces where the controller should manage the scale of deployments. The namespace must have `working_hours_managed_namespaces_label_selector` set."
   type        = map(string)
   default = {
     "sparkfabrik.com/application-availability" : "working-hours"
   }
 }
 
-# @TODO: at next breaking rename this to working_hours_deployments_label_selector
-variable "deployments_label_selector" {
+variable "working_hours_deployments_label_selector" {
   description = "Label selector for the Deployments to be scaled during working-hours."
   type        = map(string)
   default = {
@@ -108,8 +118,7 @@ variable "deployments_label_selector" {
   }
 }
 
-# @TODO: at next breaking rename this to working_hours_statefulsets_label_selector
-variable "statefulsets_label_selector" {
+variable "working_hours_statefulsets_label_selector" {
   description = "Label selector for the Statefulsets to be scaled during working-hours."
   type        = map(string)
   default = {
@@ -117,15 +126,13 @@ variable "statefulsets_label_selector" {
   }
 }
 
-# @TODO: at next breaking rename this to working_hours_configmap_name_prefix
-variable "configmap_name_prefix" {
+variable "working_hours_configmap_name_prefix" {
   description = "Name prefix for the Config Maps."
   type        = string
   default     = "application-sleep-cycles-config"
 }
 
-# @TODO: at next breaking rename this to working_hours_cronjob_timezone
-variable "cronjob_timezone" {
+variable "working_hours_cronjob_timezone" {
   description = "Timezone to use for the cron jobs. If not specified, the `default_cronjob_timezone` variable will be used."
   type        = string
   default     = ""

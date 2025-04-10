@@ -23,3 +23,8 @@ metadata:
   labels:
     sparkfabrik.com/application-sleep-cycles: "enabled"
     sparkfabrik.com/application-availability: "working-hours"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx-always-on

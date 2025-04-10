@@ -45,3 +45,5 @@ application-pod-shell: check-context
 
 application-pod-delete: check-context
 	@kubectl -n application-sleep-cycles delete --force --grace-period 0 pod application-test
+
+application-pod-restart: check-context application-pod-delete application-pod-deploy

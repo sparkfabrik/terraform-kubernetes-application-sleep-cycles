@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-always-on
+    always_on: "true"
+  name: nginx-always-on
+  namespace: nginx-always-on
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-always-on
+  template:
+    metadata:
+      labels:
+        app: nginx-always-on
+    spec:
+      containers:
+        - image: nginx:alpine-slim
+          name: nginx-always-on
+          imagePullPolicy: IfNotPresent

@@ -3,7 +3,7 @@
 data "kubernetes_resources" "managed_namespaces_by_labels" {
   kind           = "Namespace"
   api_version    = "v1"
-  label_selector = join(",", [for k, v in var.managed_namespaces_label_selector : "${k}=${v}"])
+  label_selector = join(",", [for k, v in var.working_hours_managed_namespaces_label_selector : v != null ? "${k}=${v}" : k])
 }
 
 # The namespace in which we want to deploy the cronjob is created only if the
@@ -94,7 +94,7 @@ resource "kubernetes_cluster_role_binding_v1" "cluster_scoped" {
 
 resource "kubernetes_config_map_v1" "app_env" {
   metadata {
-    name      = "${var.configmap_name_prefix}-env"
+    name      = "${var.working_hours_configmap_name_prefix}-env"
     namespace = local.cronjob_namespace
     labels    = local.k8s_full_labels
   }
@@ -102,16 +102,18 @@ resource "kubernetes_config_map_v1" "app_env" {
   data = {
     "NAMESPACES" : join(",", local.managed_namespaces),
     "PROTECTED_NAMESPACES" : join(",", local.protected_namespaces),
-    "NAMESPACES_LABEL_SELECTOR" : join(",", [for k, v in var.managed_namespaces_label_selector : "${k}=${v}"]),
-    "NAMESPACES_ALL_LABEL_SELECTOR" : join(",", [for k, v in var.managed_namespaces_all_label_selector : "${k}=${v}"]),
-    "DEPLOYMENTS_LABEL_SELECTOR" : join(",", [for k, v in var.deployments_label_selector : "${k}=${v}"]),
-    "STATEFULSETS_LABEL_SELECTOR" : join(",", [for k, v in var.statefulsets_label_selector : "${k}=${v}"]),
+    "NAMESPACES_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_managed_namespaces_label_selector : v != null ? "${k}=${v}" : k]),
+    "NAMESPACES_ALL_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_managed_namespaces_all_label_selector : v != null ? "${k}=${v}" : k]),
+    "DEPLOYMENTS_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_deployments_label_selector : v != null ? "${k}=${v}" : k]),
+    "STATEFULSETS_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_statefulsets_label_selector : v != null ? "${k}=${v}" : k]),
+    "RUN_ON_ALL_NAMESPACES" : var.working_hours_all_namespaces ? "1" : "0",
+    "RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_all_namespaces_excluded_resources_label_selector : v != null ? "!${k}=${v}" : "!${k}"]),
   }
 }
 
 resource "kubernetes_config_map_v1" "app" {
   metadata {
-    name      = "${var.configmap_name_prefix}-app"
+    name      = "${var.working_hours_configmap_name_prefix}-app"
     namespace = local.cronjob_namespace
     labels    = local.k8s_full_labels
   }

@@ -10,7 +10,7 @@ remove_terminating_pods() {
   PODS=$(kubectl get pod --all-namespaces | grep -i terminating | awk '{print $1","$2}')
   if [ -z "${PODS}" ]; then
     echo "No pods stuck in terminating state to remove."
-    exit 0
+    return 0
   fi
 
   for POD in ${PODS}; do
