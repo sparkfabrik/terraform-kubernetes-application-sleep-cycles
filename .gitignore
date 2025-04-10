@@ -28,5 +28,6 @@ override.tf.json
 
 # Project specific files
 **/*kubeconfig*
+!/tests/scripts/kind-generate-kubeconfig.sh
 /tests/terraform/.terraform
 /tests/terraform/state
