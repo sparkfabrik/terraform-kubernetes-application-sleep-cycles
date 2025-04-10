@@ -3,7 +3,7 @@
 DRY_RUN=${DRY_RUN:-0}
 PROTECTED_NAMESPACES=${PROTECTED_NAMESPACES:-}
 
-# Function to drain nodes
+# Function to remove pods stuck in terminating state
 remove_terminating_pods() {
   local PODS POD POD_NAMESPACE POD_NAME
 
