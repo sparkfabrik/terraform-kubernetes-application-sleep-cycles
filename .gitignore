@@ -25,3 +25,8 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Project specific files
+**/*kubeconfig*
+/tests/terraform/.terraform
+/tests/terraform/state

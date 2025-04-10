@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-labelled
+    sparkfabrik.com/application-availability: "working-hours"
+  name: nginx-labelled
+  namespace: nginx-labelled
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-labelled
+  template:
+    metadata:
+      labels:
+        app: nginx-labelled
+    spec:
+      containers:
+        - image: nginx:alpine-slim
+          name: nginx-labelled
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx-not-labelled
+  name: nginx-not-labelled
+  namespace: nginx-labelled
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-not-labelled
+  template:
+    metadata:
+      labels:
+        app: nginx-not-labelled
+    spec:
+      containers:
+        - image: nginx:alpine-slim
+          name: nginx-not-labelled
+          imagePullPolicy: IfNotPresent

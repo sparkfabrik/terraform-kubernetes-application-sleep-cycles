@@ -3,20 +3,7 @@
 data "kubernetes_resources" "managed_namespaces_by_labels" {
   kind           = "Namespace"
   api_version    = "v1"
-  label_selector = join(",", [for k, v in var.managed_namespaces_label_selector : "${k}=${v}"])
-}
-
-locals {
-  k8s_full_labels = merge(
-    var.k8s_labels,
-    var.k8s_additional_labels,
-  )
-
-  cronjob_namespace = var.create_namespace ? var.namespace : data.kubernetes_namespace_v1.this[0].metadata[0].name
-
-  managed_namespaces = distinct(concat(var.managed_namespaces, data.kubernetes_resources.managed_namespaces_by_labels.objects[*].metadata.name))
-
-  protected_namespaces = distinct(concat(var.protected_namespaces, var.additional_protected_namespaces))
+  label_selector = join(",", [for k, v in var.working_hours_managed_namespaces_label_selector : v != null ? "${k}=${v}" : k])
 }
 
 # The namespace in which we want to deploy the cronjob is created only if the
@@ -74,21 +61,15 @@ resource "kubernetes_cluster_role_v1" "cluster_scoped" {
     labels = local.k8s_full_labels
   }
 
-  rule {
-    api_groups = [""]
-    resources  = ["namespaces"]
-    verbs      = ["get", "list"]
-  }
-  rule {
-    api_groups = ["apps"]
-    resources  = ["deployments", "statefulsets"]
-    verbs      = ["get", "list"]
-  }
+  # Additional RBAC permissions for the node drain feature.
+  dynamic "rule" {
+    for_each = local.final_rbac_cluster_scoped
 
-  rule {
-    api_groups = ["apps"]
-    resources  = ["deployments/scale", "statefulsets/scale"]
-    verbs      = ["update", "patch"]
+    content {
+      api_groups = rule.value.api_groups
+      resources  = rule.value.resources
+      verbs      = rule.value.verbs
+    }
   }
 }
 
@@ -113,7 +94,7 @@ resource "kubernetes_cluster_role_binding_v1" "cluster_scoped" {
 
 resource "kubernetes_config_map_v1" "app_env" {
   metadata {
-    name      = "${var.configmap_name_prefix}-env"
+    name      = "${var.working_hours_configmap_name_prefix}-env"
     namespace = local.cronjob_namespace
     labels    = local.k8s_full_labels
   }
@@ -121,16 +102,18 @@ resource "kubernetes_config_map_v1" "app_env" {
   data = {
     "NAMESPACES" : join(",", local.managed_namespaces),
     "PROTECTED_NAMESPACES" : join(",", local.protected_namespaces),
-    "NAMESPACES_LABEL_SELECTOR" : join(",", [for k, v in var.managed_namespaces_label_selector : "${k}=${v}"]),
-    "NAMESPACES_ALL_LABEL_SELECTOR" : join(",", [for k, v in var.managed_namespaces_all_label_selector : "${k}=${v}"]),
-    "DEPLOYMENTS_LABEL_SELECTOR" : join(",", [for k, v in var.deployments_label_selector : "${k}=${v}"]),
-    "STATEFULSETS_LABEL_SELECTOR" : join(",", [for k, v in var.statefulsets_label_selector : "${k}=${v}"]),
+    "NAMESPACES_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_managed_namespaces_label_selector : v != null ? "${k}=${v}" : k]),
+    "NAMESPACES_ALL_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_managed_namespaces_all_label_selector : v != null ? "${k}=${v}" : k]),
+    "DEPLOYMENTS_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_deployments_label_selector : v != null ? "${k}=${v}" : k]),
+    "STATEFULSETS_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_statefulsets_label_selector : v != null ? "${k}=${v}" : k]),
+    "RUN_ON_ALL_NAMESPACES" : var.working_hours_all_namespaces ? "1" : "0",
+    "RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_all_namespaces_excluded_resources_label_selector : v != null ? "!${k}=${v}" : "!${k}"]),
   }
 }
 
 resource "kubernetes_config_map_v1" "app" {
   metadata {
-    name      = "${var.configmap_name_prefix}-app"
+    name      = "${var.working_hours_configmap_name_prefix}-app"
     namespace = local.cronjob_namespace
     labels    = local.k8s_full_labels
   }
@@ -144,21 +127,28 @@ resource "kubernetes_config_map_v1" "app" {
 resource "kubernetes_manifest" "scale_down" {
   manifest = yamldecode(
     templatefile(
-      "${path.module}/files/k8s-working-hours-cronjob.yaml.tftpl",
+      "${path.module}/files/k8s-base-cronjob.yaml.tftpl",
       {
         name               = "${var.working_hours_resource_prefix}-scale-down"
         namespace          = local.cronjob_namespace
         labels             = local.k8s_full_labels
         suspend            = var.working_hours_suspend
         schedule           = var.working_hours_scale_down_schedule
-        timezone           = var.cronjob_timezone
-        image              = var.working_hours_docker_image
+        timezone           = local.working_hours_cronjob_timezone
+        image              = local.working_hours_docker_image
         config_map_app     = kubernetes_config_map_v1.app.metadata[0].name
         config_map_app_env = kubernetes_config_map_v1.app_env.metadata[0].name
         service_account    = kubernetes_service_account_v1.this.metadata[0].name
 
+        # Static configuration
+        script_name    = "working-hours.sh"
+        request_cpu    = "100m"
+        request_memory = "128Mi"
+
         # This is the scale down script, so we want to scale down the replicas to 0.
-        go_to_replicas = 0
+        additional_env = {
+          "GO_TO_REPLICAS" : "0"
+        }
       }
     )
   )
@@ -167,21 +157,142 @@ resource "kubernetes_manifest" "scale_down" {
 resource "kubernetes_manifest" "scale_up" {
   manifest = yamldecode(
     templatefile(
-      "${path.module}/files/k8s-working-hours-cronjob.yaml.tftpl",
+      "${path.module}/files/k8s-base-cronjob.yaml.tftpl",
       {
         name               = "${var.working_hours_resource_prefix}-scale-up"
         namespace          = local.cronjob_namespace
         labels             = local.k8s_full_labels
         suspend            = var.working_hours_suspend
         schedule           = var.working_hours_scale_up_schedule
-        timezone           = var.cronjob_timezone
-        image              = var.working_hours_docker_image
+        timezone           = local.working_hours_cronjob_timezone
+        image              = local.working_hours_docker_image
         config_map_app     = kubernetes_config_map_v1.app.metadata[0].name
         config_map_app_env = kubernetes_config_map_v1.app_env.metadata[0].name
         service_account    = kubernetes_service_account_v1.this.metadata[0].name
 
+        # Static configuration
+        script_name    = "working-hours.sh"
+        request_cpu    = "100m"
+        request_memory = "128Mi"
+
         # This is the scale up script, so we want to scale up the replicas to 1.
-        go_to_replicas = 1
+        additional_env = {
+          "GO_TO_REPLICAS" : "1"
+        }
+      }
+    )
+  )
+}
+
+# Node drain feature specific resources
+resource "kubernetes_config_map_v1" "node_drain_app_env" {
+  count = var.node_drain_enabled ? 1 : 0
+
+  metadata {
+    name      = "${var.node_drain_configmap_name_prefix}-env"
+    namespace = local.cronjob_namespace
+    labels    = local.k8s_full_labels
+  }
+
+  data = {
+    NODES_LABEL_SELECTORS = join("|", [for lbls in var.node_drain_nodes_label_selector : join(",", [for k, v in lbls : "${k}=${v}"])]),
+  }
+}
+
+resource "kubernetes_config_map_v1" "node_drain_app" {
+  count = var.node_drain_enabled ? 1 : 0
+
+  metadata {
+    name      = "${var.node_drain_configmap_name_prefix}-app"
+    namespace = local.cronjob_namespace
+    labels    = local.k8s_full_labels
+  }
+
+  binary_data = {
+    "node-drain.sh" = filebase64("${path.module}/files/node-drain.sh"),
+  }
+}
+
+resource "kubernetes_manifest" "node_drain_cronjob" {
+  count = var.node_drain_enabled ? 1 : 0
+
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/files/k8s-base-cronjob.yaml.tftpl",
+      {
+        name               = "${var.node_drain_resource_prefix}-cronjob"
+        namespace          = local.cronjob_namespace
+        labels             = local.k8s_full_labels
+        suspend            = var.node_drain_suspend
+        schedule           = var.node_drain_cronjob_schedule
+        timezone           = local.node_drain_cronjob_timezone
+        image              = local.node_drain_docker_image
+        config_map_app     = kubernetes_config_map_v1.node_drain_app[0].metadata[0].name
+        config_map_app_env = kubernetes_config_map_v1.node_drain_app_env[0].metadata[0].name
+        service_account    = kubernetes_service_account_v1.this.metadata[0].name
+
+        # Static configuration
+        script_name    = "node-drain.sh"
+        request_cpu    = "100m"
+        request_memory = "128Mi"
+        additional_env = null
+      }
+    )
+  )
+}
+
+# Remove terminating pods feature specific resources
+resource "kubernetes_config_map_v1" "remove_terminating_pods_app_env" {
+  count = var.remove_terminating_pods_enabled ? 1 : 0
+
+  metadata {
+    name      = "${var.remove_terminating_pods_configmap_name_prefix}-env"
+    namespace = local.cronjob_namespace
+    labels    = local.k8s_full_labels
+  }
+
+  data = {
+    "PROTECTED_NAMESPACES" : join(",", local.protected_namespaces),
+  }
+}
+
+resource "kubernetes_config_map_v1" "remove_terminating_pods_app" {
+  count = var.remove_terminating_pods_enabled ? 1 : 0
+
+  metadata {
+    name      = "${var.remove_terminating_pods_configmap_name_prefix}-app"
+    namespace = local.cronjob_namespace
+    labels    = local.k8s_full_labels
+  }
+
+  binary_data = {
+    "remove-terminating-pods.sh" = filebase64("${path.module}/files/remove-terminating-pods.sh"),
+  }
+}
+
+resource "kubernetes_manifest" "remove_terminating_pods_cronjob" {
+  count = var.remove_terminating_pods_enabled ? 1 : 0
+
+  manifest = yamldecode(
+    templatefile(
+      "${path.module}/files/k8s-base-cronjob.yaml.tftpl",
+      {
+        name               = "${var.remove_terminating_pods_resource_prefix}-cronjob"
+        namespace          = local.cronjob_namespace
+        labels             = local.k8s_full_labels
+        suspend            = var.remove_terminating_pods_suspend
+        schedule           = var.remove_terminating_pods_cronjob_schedule
+        timezone           = local.remove_terminating_pods_cronjob_timezone
+        image              = local.remove_terminating_pods_docker_image
+        config_map_app     = kubernetes_config_map_v1.remove_terminating_pods_app[0].metadata[0].name
+        config_map_app_env = kubernetes_config_map_v1.remove_terminating_pods_app_env[0].metadata[0].name
+        service_account    = kubernetes_service_account_v1.this.metadata[0].name
+
+        # Static configuration
+        script_name    = "remove-terminating-pods.sh"
+        request_cpu    = "100m"
+        request_memory = "128Mi"
+        additional_env = null
       }
     )
   )

@@ -8,6 +8,8 @@ NAMESPACES_ALL_LABEL_SELECTOR=${NAMESPACES_ALL_LABEL_SELECTOR:-}
 DEPLOYMENTS_LABEL_SELECTOR=${DEPLOYMENTS_LABEL_SELECTOR:-}
 STATEFULSETS_LABEL_SELECTOR=${STATEFULSETS_LABEL_SELECTOR:-}
 GO_TO_REPLICAS=${GO_TO_REPLICAS:-1}
+RUN_ON_ALL_NAMESPACES=${RUN_ON_ALL_NAMESPACES:-0}
+RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR=${RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR:-}
 
 filter_namespaces() {
   # Usage examples:
@@ -86,68 +88,91 @@ scale_resources() {
   return 0
 }
 
-# Filter out protected namespaces
-NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}")
+if [ "${RUN_ON_ALL_NAMESPACES}" -eq "0" ]; then
+  # The script is running only on the specified namespaces
+  echo "Running only on specified namespaces"
 
-# Get namespaces with label selector
-LABELLED_NAMESPACES=""
-if [ -n "${NAMESPACES_LABEL_SELECTOR}" ]; then
-  LABELLED_NAMESPACES=$(kubectl get namespaces -l "${NAMESPACES_LABEL_SELECTOR}" -o jsonpath='{.items[*].metadata.name}')
-  # Check if any of protected namespaces are in labelled namespace and remove it from labelled namespace list
-  LABELLED_NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${LABELLED_NAMESPACES}")
-  if [ -n "${NAMESPACES}" ] && [ -n "${LABELLED_NAMESPACES}" ]; then
-    # If both NAMESPACES and LABELLED_NAMESPACES are set, merge them
-    NAMESPACES="${NAMESPACES},${LABELLED_NAMESPACES}"
-  elif [ -n "${LABELLED_NAMESPACES}" ]; then
-    # If only LABELLED_NAMESPACES is set, use it
-    NAMESPACES="${LABELLED_NAMESPACES}"
+  # Filter out protected namespaces
+  NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}")
+
+  # Get namespaces with label selector
+  LABELLED_NAMESPACES=""
+  if [ -n "${NAMESPACES_LABEL_SELECTOR}" ]; then
+    LABELLED_NAMESPACES=$(kubectl get namespaces -l "${NAMESPACES_LABEL_SELECTOR}" -o jsonpath='{.items[*].metadata.name}')
+    # Check if any of protected namespaces are in labelled namespace and remove it from labelled namespace list
+    LABELLED_NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${LABELLED_NAMESPACES}")
+    if [ -n "${NAMESPACES}" ] && [ -n "${LABELLED_NAMESPACES}" ]; then
+      # If both NAMESPACES and LABELLED_NAMESPACES are set, merge them
+      NAMESPACES="${NAMESPACES},${LABELLED_NAMESPACES}"
+    elif [ -n "${LABELLED_NAMESPACES}" ]; then
+      # If only LABELLED_NAMESPACES is set, use it
+      NAMESPACES="${LABELLED_NAMESPACES}"
+    fi
   fi
-fi
 
-# Get namespaces with label selector all
-LABELLED_NAMESPACES_ALL=""
-if [ -n "${NAMESPACES_ALL_LABEL_SELECTOR}" ]; then
-  LABELLED_NAMESPACES_ALL=$(kubectl get namespaces -l "${NAMESPACES_LABEL_SELECTOR}","${NAMESPACES_ALL_LABEL_SELECTOR}" -o jsonpath='{.items[*].metadata.name}')
-  # Check if any of protected namespaces are in labelled namespace and remove it from labelled namespace list
-  WARNINGS=""
-  LABELLED_NAMESPACES_ALL=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${LABELLED_NAMESPACES_ALL}")
-  if [ -n "$WARNINGS" ]; then
-    printf "Filtering warnings:\n%b" "$WARNINGS" >&2
+  # Get namespaces with label selector all
+  LABELLED_NAMESPACES_ALL=""
+  if [ -n "${NAMESPACES_ALL_LABEL_SELECTOR}" ]; then
+    LABELLED_NAMESPACES_ALL=$(kubectl get namespaces -l "${NAMESPACES_LABEL_SELECTOR}","${NAMESPACES_ALL_LABEL_SELECTOR}" -o jsonpath='{.items[*].metadata.name}')
+    # Check if any of protected namespaces are in labelled namespace and remove it from labelled namespace list
+    WARNINGS=""
+    LABELLED_NAMESPACES_ALL=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${LABELLED_NAMESPACES_ALL}")
+    if [ -n "$WARNINGS" ]; then
+      printf "Filtering warnings:\n%b" "$WARNINGS" >&2
+    fi
   fi
-fi
 
-if [ -z "${NAMESPACES}" ]; then
-  echo "NAMESPACES variable is not set. Nothing to do."
-  exit 0
-fi
-
-if [ -z "${DEPLOYMENTS_LABEL_SELECTOR}" ] && [ -z "${STATEFULSETS_LABEL_SELECTOR}" ] && [ -z "${LABELLED_NAMESPACES_ALL}" ]; then
-  echo "DEPLOYMENTS_LABEL_SELECTOR or STATEFULSETS_LABEL_SELECTOR variable is not set. Nothing to do."
-  exit 0
-fi
-
-echo "Involved namespaces: ${NAMESPACES}"
-echo "Namespaces set for all resources management: ${LABELLED_NAMESPACES_ALL}"
-echo "Deployments label selector: ${DEPLOYMENTS_LABEL_SELECTOR}"
-
-# Filter out all resources namespace
-NAMESPACES=$(filter_namespaces "${LABELLED_NAMESPACES_ALL}" "${NAMESPACES}" 1)
-
-for KUBE_NAMESPACE in $(echo "${NAMESPACES}" | tr "," " "); do
-  echo "Processing namespace: ${KUBE_NAMESPACE}"
-  if [ -n "${DEPLOYMENTS_LABEL_SELECTOR}" ]; then
-    scale_resources -n "${KUBE_NAMESPACE}" -r deployment -l "${DEPLOYMENTS_LABEL_SELECTOR}" -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
+  if [ -z "${NAMESPACES}" ]; then
+    echo "NAMESPACES variable is not set. Nothing to do."
+    exit 0
   fi
-  if [ -n "${STATEFULSETS_LABEL_SELECTOR}" ]; then
-    scale_resources -n "${KUBE_NAMESPACE}" -r statefulset -l "${STATEFULSETS_LABEL_SELECTOR}" -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
-  fi
-done
 
-if [ -n "${LABELLED_NAMESPACES_ALL}" ]; then
-  echo "Processing all labelled namespaces: ${LABELLED_NAMESPACES_ALL}"
-  for KUBE_NAMESPACE in $(echo "${LABELLED_NAMESPACES_ALL}" | tr "," " "); do
+  if [ -z "${DEPLOYMENTS_LABEL_SELECTOR}" ] && [ -z "${STATEFULSETS_LABEL_SELECTOR}" ] && [ -z "${LABELLED_NAMESPACES_ALL}" ]; then
+    echo "DEPLOYMENTS_LABEL_SELECTOR or STATEFULSETS_LABEL_SELECTOR variable is not set. Nothing to do."
+    exit 0
+  fi
+
+  echo "Involved namespaces: ${NAMESPACES}"
+  echo "Namespaces set for all resources management: ${LABELLED_NAMESPACES_ALL}"
+  echo "Deployments label selector: ${DEPLOYMENTS_LABEL_SELECTOR}"
+
+  # Filter out all resources namespace
+  NAMESPACES=$(filter_namespaces "${LABELLED_NAMESPACES_ALL}" "${NAMESPACES}" 1)
+
+  for KUBE_NAMESPACE in $(echo "${NAMESPACES}" | tr "," " "); do
     echo "Processing namespace: ${KUBE_NAMESPACE}"
-    scale_resources -n "${KUBE_NAMESPACE}" -r deployment -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
-    scale_resources -n "${KUBE_NAMESPACE}" -r statefulset -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
+    if [ -n "${DEPLOYMENTS_LABEL_SELECTOR}" ]; then
+      scale_resources -n "${KUBE_NAMESPACE}" -r deployment -l "${DEPLOYMENTS_LABEL_SELECTOR}" -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
+    fi
+    if [ -n "${STATEFULSETS_LABEL_SELECTOR}" ]; then
+      scale_resources -n "${KUBE_NAMESPACE}" -r statefulset -l "${STATEFULSETS_LABEL_SELECTOR}" -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
+    fi
+  done
+
+  if [ -n "${LABELLED_NAMESPACES_ALL}" ]; then
+    echo "Processing all labelled namespaces: ${LABELLED_NAMESPACES_ALL}"
+    for KUBE_NAMESPACE in $(echo "${LABELLED_NAMESPACES_ALL}" | tr "," " "); do
+      echo "Processing namespace: ${KUBE_NAMESPACE}"
+      scale_resources -n "${KUBE_NAMESPACE}" -r deployment -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
+      scale_resources -n "${KUBE_NAMESPACE}" -r statefulset -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
+    done
+  fi
+else
+  # The script is running on all namespaces, except for the protected ones
+  echo "Running on all namespaces, except for the protected ones"
+
+  # Get all namespaces
+  ALL_NAMESPACES=$(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}' | sed 's/ /,/g')
+  NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${ALL_NAMESPACES}")
+  for KUBE_NAMESPACE in $(echo "${NAMESPACES}" | tr "," " "); do
+    echo "Processing namespace: ${KUBE_NAMESPACE}"
+
+    EXCLUDED_RESOURCES_LABEL_SELECTOR_OPT=""
+    if [ -n "${RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR}" ]; then
+      EXCLUDED_RESOURCES_LABEL_SELECTOR_OPT="-l ${RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR}"
+    fi
+
+    scale_resources -n "${KUBE_NAMESPACE}" -r deployment -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}" ${EXCLUDED_RESOURCES_LABEL_SELECTOR_OPT}
+    scale_resources -n "${KUBE_NAMESPACE}" -r statefulset -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}" ${EXCLUDED_RESOURCES_LABEL_SELECTOR_OPT}
   done
 fi

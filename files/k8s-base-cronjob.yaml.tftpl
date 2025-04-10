@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  %{~ if length(labels) > 0 }
-  %{~ for lbl_key, lbl_value in labels }
+  %{~ if length(coalesce(labels, {})) > 0 }
   labels:
+  %{~ for lbl_key, lbl_value in coalesce(labels, {}) }
     ${lbl_key}: "${lbl_value}"
   %{~ endfor ~}
   %{~ endif ~}
@@ -22,10 +22,14 @@ spec:
         spec:
           containers:
             - command:
-                - /app/working-hours.sh
+                - /app/${script_name}
+              %{~ if length(coalesce(additional_env, {})) > 0 }
               env:
-                - name: GO_TO_REPLICAS
-                  value: ${go_to_replicas}
+              %{~ for env_key, env_value in coalesce(additional_env, {}) }
+                - name: "${env_key}"
+                  value: "${env_value}"
+              %{~ endfor ~}
+              %{~ endif ~}
               envFrom:
                 - configMapRef:
                     name: ${config_map_app_env}
@@ -34,8 +38,8 @@ spec:
               name: ${name}
               resources:
                 requests:
-                  cpu: 100m
-                  memory: 128Mi
+                  cpu: ${request_cpu}
+                  memory: ${request_memory}
               volumeMounts:
                 - name: app
                   mountPath: /app
