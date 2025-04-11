@@ -10,6 +10,12 @@ variable "namespace" {
   default     = "application-sleep-cycles"
 }
 
+variable "default_docker_registry" {
+  description = "Docker registry to use when the registry is not specified for the specific feature. Keep it empty to use the default registry (DockerHub)."
+  type        = string
+  default     = ""
+}
+
 variable "default_docker_image" {
   description = "Docker image to use when the image is not specified for the specific feature."
   type        = string
@@ -144,6 +150,12 @@ variable "working_hours_resource_prefix" {
   default     = "application-sleep-cycles-working-hours"
 }
 
+variable "working_hours_docker_registry" {
+  description = "Docker registry to use for the working hours CronJobs. If not specified, the `default_docker_registry` variable will be used."
+  type        = string
+  default     = ""
+}
+
 variable "working_hours_docker_image" {
   description = "Docker image to use for the working hours CronJobs. If not specified, the `default_docker_image` variable will be used."
   type        = string
@@ -179,6 +191,12 @@ variable "node_drain_suspend" {
   description = "Suspend the node drain CronJob."
   type        = bool
   default     = false
+}
+
+variable "node_drain_docker_registry" {
+  description = "Docker registry to use for the node drain CronJobs. If not specified, the `default_docker_registry` variable will be used."
+  type        = string
+  default     = ""
 }
 
 variable "node_drain_docker_image" {
@@ -228,6 +246,12 @@ variable "remove_terminating_pods_suspend" {
   description = "Suspend the remove terminating pods CronJob."
   type        = bool
   default     = false
+}
+
+variable "remove_terminating_pods_docker_registry" {
+  description = "Docker registry to use for the remove terminating pods CronJobs. If not specified, the `default_docker_registry` variable will be used."
+  type        = string
+  default     = ""
 }
 
 variable "remove_terminating_pods_docker_image" {
