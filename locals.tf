@@ -4,10 +4,20 @@ locals {
     var.k8s_additional_labels,
   )
 
+  # Calculate the docker registry to use for the features.
+  working_hours_docker_registry           = var.working_hours_docker_registry != "" ? var.working_hours_docker_registry : var.default_docker_registry
+  node_drain_docker_registry              = var.node_drain_docker_registry != "" ? var.node_drain_docker_registry : var.default_docker_registry
+  remove_terminating_pods_docker_registry = var.remove_terminating_pods_docker_registry != "" ? var.remove_terminating_pods_docker_registry : var.default_docker_registry
+
   # Calculate the docker image to use for the features.
   working_hours_docker_image           = var.working_hours_docker_image != "" ? var.working_hours_docker_image : var.default_docker_image
   node_drain_docker_image              = var.node_drain_docker_image != "" ? var.node_drain_docker_image : var.default_docker_image
   remove_terminating_pods_docker_image = var.remove_terminating_pods_docker_image != "" ? var.remove_terminating_pods_docker_image : var.default_docker_image
+
+  # Final docker image to use for the features.
+  working_hours_final_docker_image           = local.working_hours_docker_registry == "" ? local.working_hours_docker_image : "${local.working_hours_docker_registry}${endswith(local.working_hours_docker_registry, "/") ? "" : "/"}${local.working_hours_docker_image}"
+  node_drain_final_docker_image              = local.node_drain_docker_registry == "" ? local.node_drain_docker_image : "${local.node_drain_docker_registry}${endswith(local.node_drain_docker_registry, "/") ? "" : "/"}${local.node_drain_docker_image}"
+  remove_terminating_pods_final_docker_image = local.remove_terminating_pods_docker_registry == "" ? local.remove_terminating_pods_docker_image : "${local.remove_terminating_pods_docker_registry}${endswith(local.remove_terminating_pods_docker_registry, "/") ? "" : "/"}${local.remove_terminating_pods_docker_image}"
 
   # Calculate the CronJob timezone to use for the features.
   working_hours_cronjob_timezone           = var.working_hours_cronjob_timezone != "" ? var.working_hours_cronjob_timezone : var.default_cronjob_timezone

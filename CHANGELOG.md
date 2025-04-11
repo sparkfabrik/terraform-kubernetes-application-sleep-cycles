@@ -8,6 +8,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-04-11
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/1.0.0...1.1.0)
+
+### Added
+
+- Add support to define docker registry separately from the docker image. This allows to use the image defined in the module, but to use a different registry for the image.
+
 ## [1.0.0] - 2025-04-10
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/0.2.0...1.0.0)

@@ -135,7 +135,7 @@ resource "kubernetes_manifest" "scale_down" {
         suspend            = var.working_hours_suspend
         schedule           = var.working_hours_scale_down_schedule
         timezone           = local.working_hours_cronjob_timezone
-        image              = local.working_hours_docker_image
+        image              = local.working_hours_final_docker_image
         config_map_app     = kubernetes_config_map_v1.app.metadata[0].name
         config_map_app_env = kubernetes_config_map_v1.app_env.metadata[0].name
         service_account    = kubernetes_service_account_v1.this.metadata[0].name
@@ -165,7 +165,7 @@ resource "kubernetes_manifest" "scale_up" {
         suspend            = var.working_hours_suspend
         schedule           = var.working_hours_scale_up_schedule
         timezone           = local.working_hours_cronjob_timezone
-        image              = local.working_hours_docker_image
+        image              = local.working_hours_final_docker_image
         config_map_app     = kubernetes_config_map_v1.app.metadata[0].name
         config_map_app_env = kubernetes_config_map_v1.app_env.metadata[0].name
         service_account    = kubernetes_service_account_v1.this.metadata[0].name
@@ -226,7 +226,7 @@ resource "kubernetes_manifest" "node_drain_cronjob" {
         suspend            = var.node_drain_suspend
         schedule           = var.node_drain_cronjob_schedule
         timezone           = local.node_drain_cronjob_timezone
-        image              = local.node_drain_docker_image
+        image              = local.node_drain_final_docker_image
         config_map_app     = kubernetes_config_map_v1.node_drain_app[0].metadata[0].name
         config_map_app_env = kubernetes_config_map_v1.node_drain_app_env[0].metadata[0].name
         service_account    = kubernetes_service_account_v1.this.metadata[0].name
@@ -283,7 +283,7 @@ resource "kubernetes_manifest" "remove_terminating_pods_cronjob" {
         suspend            = var.remove_terminating_pods_suspend
         schedule           = var.remove_terminating_pods_cronjob_schedule
         timezone           = local.remove_terminating_pods_cronjob_timezone
-        image              = local.remove_terminating_pods_docker_image
+        image              = local.remove_terminating_pods_final_docker_image
         config_map_app     = kubernetes_config_map_v1.remove_terminating_pods_app[0].metadata[0].name
         config_map_app_env = kubernetes_config_map_v1.remove_terminating_pods_app_env[0].metadata[0].name
         service_account    = kubernetes_service_account_v1.this.metadata[0].name
