@@ -8,6 +8,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.0] - 2025-04-15
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/1.1.0...1.2.0)
+
+### Added
+
+- Add support for node affinity and tolerations for the cronjobs.
+
 ## [1.1.0] - 2025-04-11
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/1.0.0...1.1.0)

@@ -129,16 +129,18 @@ resource "kubernetes_manifest" "scale_down" {
     templatefile(
       "${path.module}/files/k8s-base-cronjob.yaml.tftpl",
       {
-        name               = "${var.working_hours_resource_prefix}-scale-down"
-        namespace          = local.cronjob_namespace
-        labels             = local.k8s_full_labels
-        suspend            = var.working_hours_suspend
-        schedule           = var.working_hours_scale_down_schedule
-        timezone           = local.working_hours_cronjob_timezone
-        image              = local.working_hours_final_docker_image
-        config_map_app     = kubernetes_config_map_v1.app.metadata[0].name
-        config_map_app_env = kubernetes_config_map_v1.app_env.metadata[0].name
-        service_account    = kubernetes_service_account_v1.this.metadata[0].name
+        name                            = "${var.working_hours_resource_prefix}-scale-down"
+        namespace                       = local.cronjob_namespace
+        labels                          = local.k8s_full_labels
+        suspend                         = var.working_hours_suspend
+        schedule                        = var.working_hours_scale_down_schedule
+        timezone                        = local.working_hours_cronjob_timezone
+        image                           = local.working_hours_final_docker_image
+        config_map_app                  = kubernetes_config_map_v1.app.metadata[0].name
+        config_map_app_env              = kubernetes_config_map_v1.app_env.metadata[0].name
+        service_account                 = kubernetes_service_account_v1.this.metadata[0].name
+        node_affinity_match_expressions = local.working_hours_node_affinity_match_expressions
+        tolerations                     = local.working_hours_tolerations
 
         # Static configuration
         script_name    = "working-hours.sh"
@@ -159,16 +161,18 @@ resource "kubernetes_manifest" "scale_up" {
     templatefile(
       "${path.module}/files/k8s-base-cronjob.yaml.tftpl",
       {
-        name               = "${var.working_hours_resource_prefix}-scale-up"
-        namespace          = local.cronjob_namespace
-        labels             = local.k8s_full_labels
-        suspend            = var.working_hours_suspend
-        schedule           = var.working_hours_scale_up_schedule
-        timezone           = local.working_hours_cronjob_timezone
-        image              = local.working_hours_final_docker_image
-        config_map_app     = kubernetes_config_map_v1.app.metadata[0].name
-        config_map_app_env = kubernetes_config_map_v1.app_env.metadata[0].name
-        service_account    = kubernetes_service_account_v1.this.metadata[0].name
+        name                            = "${var.working_hours_resource_prefix}-scale-up"
+        namespace                       = local.cronjob_namespace
+        labels                          = local.k8s_full_labels
+        suspend                         = var.working_hours_suspend
+        schedule                        = var.working_hours_scale_up_schedule
+        timezone                        = local.working_hours_cronjob_timezone
+        image                           = local.working_hours_final_docker_image
+        config_map_app                  = kubernetes_config_map_v1.app.metadata[0].name
+        config_map_app_env              = kubernetes_config_map_v1.app_env.metadata[0].name
+        service_account                 = kubernetes_service_account_v1.this.metadata[0].name
+        node_affinity_match_expressions = local.working_hours_node_affinity_match_expressions
+        tolerations                     = local.working_hours_tolerations
 
         # Static configuration
         script_name    = "working-hours.sh"
@@ -220,16 +224,18 @@ resource "kubernetes_manifest" "node_drain_cronjob" {
     templatefile(
       "${path.module}/files/k8s-base-cronjob.yaml.tftpl",
       {
-        name               = "${var.node_drain_resource_prefix}-cronjob"
-        namespace          = local.cronjob_namespace
-        labels             = local.k8s_full_labels
-        suspend            = var.node_drain_suspend
-        schedule           = var.node_drain_cronjob_schedule
-        timezone           = local.node_drain_cronjob_timezone
-        image              = local.node_drain_final_docker_image
-        config_map_app     = kubernetes_config_map_v1.node_drain_app[0].metadata[0].name
-        config_map_app_env = kubernetes_config_map_v1.node_drain_app_env[0].metadata[0].name
-        service_account    = kubernetes_service_account_v1.this.metadata[0].name
+        name                            = "${var.node_drain_resource_prefix}-cronjob"
+        namespace                       = local.cronjob_namespace
+        labels                          = local.k8s_full_labels
+        suspend                         = var.node_drain_suspend
+        schedule                        = var.node_drain_cronjob_schedule
+        timezone                        = local.node_drain_cronjob_timezone
+        image                           = local.node_drain_final_docker_image
+        config_map_app                  = kubernetes_config_map_v1.node_drain_app[0].metadata[0].name
+        config_map_app_env              = kubernetes_config_map_v1.node_drain_app_env[0].metadata[0].name
+        service_account                 = kubernetes_service_account_v1.this.metadata[0].name
+        node_affinity_match_expressions = local.node_drain_node_affinity_match_expressions
+        tolerations                     = local.node_drain_tolerations
 
         # Static configuration
         script_name    = "node-drain.sh"
@@ -277,16 +283,18 @@ resource "kubernetes_manifest" "remove_terminating_pods_cronjob" {
     templatefile(
       "${path.module}/files/k8s-base-cronjob.yaml.tftpl",
       {
-        name               = "${var.remove_terminating_pods_resource_prefix}-cronjob"
-        namespace          = local.cronjob_namespace
-        labels             = local.k8s_full_labels
-        suspend            = var.remove_terminating_pods_suspend
-        schedule           = var.remove_terminating_pods_cronjob_schedule
-        timezone           = local.remove_terminating_pods_cronjob_timezone
-        image              = local.remove_terminating_pods_final_docker_image
-        config_map_app     = kubernetes_config_map_v1.remove_terminating_pods_app[0].metadata[0].name
-        config_map_app_env = kubernetes_config_map_v1.remove_terminating_pods_app_env[0].metadata[0].name
-        service_account    = kubernetes_service_account_v1.this.metadata[0].name
+        name                            = "${var.remove_terminating_pods_resource_prefix}-cronjob"
+        namespace                       = local.cronjob_namespace
+        labels                          = local.k8s_full_labels
+        suspend                         = var.remove_terminating_pods_suspend
+        schedule                        = var.remove_terminating_pods_cronjob_schedule
+        timezone                        = local.remove_terminating_pods_cronjob_timezone
+        image                           = local.remove_terminating_pods_final_docker_image
+        config_map_app                  = kubernetes_config_map_v1.remove_terminating_pods_app[0].metadata[0].name
+        config_map_app_env              = kubernetes_config_map_v1.remove_terminating_pods_app_env[0].metadata[0].name
+        service_account                 = kubernetes_service_account_v1.this.metadata[0].name
+        node_affinity_match_expressions = local.remove_terminating_pods_node_affinity_match_expressions
+        tolerations                     = local.remove_terminating_pods_tolerations
 
         # Static configuration
         script_name    = "remove-terminating-pods.sh"

@@ -22,6 +22,27 @@ variable "default_docker_image" {
   default     = "bitnami/kubectl:1.31"
 }
 
+variable "default_node_affinity_match_expressions" {
+  description = "List of match expressions to use for the node affinity when the node affinity is not specified for the specific feature."
+  type = list(object({
+    key      = string
+    operator = optional(string, "In")
+    values   = list(string)
+  }))
+  default = []
+}
+
+variable "default_tolerations" {
+  description = "List of tolerations to use when the tolerations are not specified for the specific feature."
+  type = list(object({
+    key      = string
+    operator = string
+    value    = optional(string, null)
+    effect   = optional(string, null)
+  }))
+  default = []
+}
+
 variable "default_cronjob_timezone" {
   description = "Default timezone to use for the CronJobs."
   type        = string
@@ -151,15 +172,36 @@ variable "working_hours_resource_prefix" {
 }
 
 variable "working_hours_docker_registry" {
-  description = "Docker registry to use for the working hours CronJobs. If not specified, the `default_docker_registry` variable will be used."
+  description = "Docker registry to use for the working hours CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used."
   type        = string
   default     = ""
 }
 
 variable "working_hours_docker_image" {
-  description = "Docker image to use for the working hours CronJobs. If not specified, the `default_docker_image` variable will be used."
+  description = "Docker image to use for the working hours CronJobs. If not specified (empty string), the `default_docker_image` variable will be used."
   type        = string
   default     = ""
+}
+
+variable "working_hours_node_affinity_match_expressions" {
+  description = "List of match expressions to use for the node affinity of the working hours CronJobs. If not specified (empty list), the `default_node_affinity_match_expressions` variable will be used."
+  type = list(object({
+    key      = string
+    operator = optional(string, "In")
+    values   = list(string)
+  }))
+  default = []
+}
+
+variable "working_hours_tolerations" {
+  description = "List of tolerations to use for the working hours CronJobs. If not specified (empty list), the `default_tolerations` variable will be used."
+  type = list(object({
+    key      = string
+    operator = string
+    value    = optional(string, null)
+    effect   = optional(string, null)
+  }))
+  default = []
 }
 
 variable "working_hours_suspend" {
@@ -194,15 +236,36 @@ variable "node_drain_suspend" {
 }
 
 variable "node_drain_docker_registry" {
-  description = "Docker registry to use for the node drain CronJobs. If not specified, the `default_docker_registry` variable will be used."
+  description = "Docker registry to use for the node drain CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used."
   type        = string
   default     = ""
 }
 
 variable "node_drain_docker_image" {
-  description = "Docker image to use for the node drain CronJob. If not specified, the `default_docker_image` variable will be used."
+  description = "Docker image to use for the node drain CronJob. If not specified (empty string), the `default_docker_image` variable will be used."
   type        = string
   default     = ""
+}
+
+variable "node_drain_node_affinity_match_expressions" {
+  description = "List of match expressions to use for the node affinity of the node drain CronJobs. If not specified (empty list), the `default_node_affinity_match_expressions` variable will be used."
+  type = list(object({
+    key      = string
+    operator = optional(string, "In")
+    values   = list(string)
+  }))
+  default = []
+}
+
+variable "node_drain_tolerations" {
+  description = "List of tolerations to use for the node drain CronJobs. If not specified (empty list), the `default_tolerations` variable will be used."
+  type = list(object({
+    key      = string
+    operator = string
+    value    = optional(string, null)
+    effect   = optional(string, null)
+  }))
+  default = []
 }
 
 variable "node_drain_resource_prefix" {
@@ -249,15 +312,36 @@ variable "remove_terminating_pods_suspend" {
 }
 
 variable "remove_terminating_pods_docker_registry" {
-  description = "Docker registry to use for the remove terminating pods CronJobs. If not specified, the `default_docker_registry` variable will be used."
+  description = "Docker registry to use for the remove terminating pods CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used."
   type        = string
   default     = ""
 }
 
 variable "remove_terminating_pods_docker_image" {
-  description = "Docker image to use for the remove terminating pods CronJob. If not specified, the `default_docker_image` variable will be used."
+  description = "Docker image to use for the remove terminating pods CronJob. If not specified (empty string), the `default_docker_image` variable will be used."
   type        = string
   default     = ""
+}
+
+variable "remove_terminating_pods_node_affinity_match_expressions" {
+  description = "List of match expressions to use for the node affinity of the remove terminating pods CronJobs. If not specified (empty list), the `default_node_affinity_match_expressions` variable will be used."
+  type = list(object({
+    key      = string
+    operator = optional(string, "In")
+    values   = list(string)
+  }))
+  default = []
+}
+
+variable "remove_terminating_pods_tolerations" {
+  description = "List of tolerations to use for the remove terminating pods CronJobs. If not specified (empty list), the `default_tolerations` variable will be used."
+  type = list(object({
+    key      = string
+    operator = string
+    value    = optional(string, null)
+    effect   = optional(string, null)
+  }))
+  default = []
 }
 
 variable "remove_terminating_pods_resource_prefix" {

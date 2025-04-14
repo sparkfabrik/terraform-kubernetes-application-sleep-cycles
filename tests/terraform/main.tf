@@ -9,6 +9,16 @@ module "application_sleep_cycles" {
     "local-path-storage"
   ]
 
+  default_node_affinity_match_expressions = [
+    {
+      key      = "scope"
+      operator = "In"
+      values = [
+        "control-plane",
+      ]
+    }
+  ]
+
   working_hours_managed_namespaces_label_selector = {
     "sparkfabrik.com/application-sleep-cycles" : "enabled"
   }
