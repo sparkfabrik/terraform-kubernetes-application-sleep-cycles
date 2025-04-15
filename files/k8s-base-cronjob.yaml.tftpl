@@ -50,3 +50,43 @@ spec:
                 name: ${config_map_app}
           serviceAccountName: ${service_account}
           restartPolicy: Never
+          %{~ if length(node_affinity_match_expressions) > 0 }
+          affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                  - matchExpressions:
+                    %{~ for node_affinity_match_expression in node_affinity_match_expressions }
+                    - key: ${node_affinity_match_expression.key}
+                      operator: ${node_affinity_match_expression.operator}
+                      values:
+                        %{~ for value in node_affinity_match_expression.values }
+                        - ${value}
+                        %{~ endfor ~}
+                    %{~ endfor ~}
+              preferredDuringSchedulingIgnoredDuringExecution:
+                %{~ for index, node_affinity_match_expression in node_affinity_match_expressions }
+                - weight: ${index + 1}
+                  preference:
+                    matchExpressions:
+                    - key: ${node_affinity_match_expression.key}
+                      operator: ${node_affinity_match_expression.operator}
+                      values:
+                        %{~ for value in node_affinity_match_expression.values }
+                        - ${value}
+                        %{~ endfor ~}
+                %{~ endfor ~}
+          %{~ endif ~}
+          %{~ if length(tolerations) > 0 }
+          tolerations:
+            %{~ for toleration in tolerations }
+            - key: ${toleration.key}
+              operator: ${toleration.operator}
+              %{~ if toleration.value != null }
+              value: ${toleration.value}
+              %{~ endif ~}
+              %{~ if toleration.effect != null }
+              effect: ${toleration.effect}
+              %{~ endif ~}
+            %{~ endfor ~}
+          %{~ endif ~}

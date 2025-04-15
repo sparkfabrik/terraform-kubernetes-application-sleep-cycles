@@ -19,6 +19,16 @@ locals {
   node_drain_final_docker_image              = local.node_drain_docker_registry == "" ? local.node_drain_docker_image : "${local.node_drain_docker_registry}${endswith(local.node_drain_docker_registry, "/") ? "" : "/"}${local.node_drain_docker_image}"
   remove_terminating_pods_final_docker_image = local.remove_terminating_pods_docker_registry == "" ? local.remove_terminating_pods_docker_image : "${local.remove_terminating_pods_docker_registry}${endswith(local.remove_terminating_pods_docker_registry, "/") ? "" : "/"}${local.remove_terminating_pods_docker_image}"
 
+  # Calculate the node affinity match expressions to use for the features.
+  working_hours_node_affinity_match_expressions           = length(var.working_hours_node_affinity_match_expressions) > 0 ? var.working_hours_node_affinity_match_expressions : var.default_node_affinity_match_expressions
+  node_drain_node_affinity_match_expressions              = length(var.node_drain_node_affinity_match_expressions) > 0 ? var.node_drain_node_affinity_match_expressions : var.default_node_affinity_match_expressions
+  remove_terminating_pods_node_affinity_match_expressions = length(var.remove_terminating_pods_node_affinity_match_expressions) > 0 ? var.remove_terminating_pods_node_affinity_match_expressions : var.default_node_affinity_match_expressions
+
+  # Calculate the tolerations to use for the features.
+  working_hours_tolerations           = length(var.working_hours_tolerations) > 0 ? var.working_hours_tolerations : var.default_tolerations
+  node_drain_tolerations              = length(var.node_drain_tolerations) > 0 ? var.node_drain_tolerations : var.default_tolerations
+  remove_terminating_pods_tolerations = length(var.remove_terminating_pods_tolerations) > 0 ? var.remove_terminating_pods_tolerations : var.default_tolerations
+
   # Calculate the CronJob timezone to use for the features.
   working_hours_cronjob_timezone           = var.working_hours_cronjob_timezone != "" ? var.working_hours_cronjob_timezone : var.default_cronjob_timezone
   node_drain_cronjob_timezone              = var.node_drain_cronjob_timezone != "" ? var.node_drain_cronjob_timezone : var.default_cronjob_timezone
