@@ -19,7 +19,7 @@ variable "default_docker_registry" {
 variable "default_docker_image" {
   description = "Docker image to use when the image is not specified for the specific feature."
   type        = string
-  default     = "bitnami/kubectl:1.31"
+  default     = "bitnamilegacy/kubectl:1.31"
 }
 
 variable "default_node_affinity_match_expressions" {

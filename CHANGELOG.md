@@ -8,6 +8,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.3.0] - 2025-08-07
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/1.2.0...1.3.0)
+
+### Changed
+
+- Temporary update default Docker image from `bitnami/kubectl:1.31` to `bitnamilegacy/kubectl:1.31` because of the deprecation of the `bitnami/kubectl` image.
+
 ## [1.2.0] - 2025-04-15
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/1.1.0...1.2.0)
