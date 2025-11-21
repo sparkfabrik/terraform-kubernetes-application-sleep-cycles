@@ -8,6 +8,61 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.0] - 2025-11-21
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/1.3.0...1.4.0)
+
+### Added
+
+- Add `default_docker_image_components` map to override registry, repository and tag together.
+- Add `working_hours_docker_image_components` to override registry, repository and tag for working hours only.
+- Add `node_drain_docker_image_components` to override registry, repository and tag for node drain only.
+- Add `remove_terminating_pods_docker_image_components` to override registry, repository and tag for remove terminating pods only.
+
+### Changed
+
+- Switch default kubectl image to `registry.k8s.io/kubectl:v1.33.5`.
+
+### Breaking
+
+- Remove `default_docker_registry`, `default_docker_repository` and `default_docker_tag` in favor of `default_docker_image_components`.
+- Remove `working_hours_docker_registry` and `working_hours_docker_image` in favor of `working_hours_docker_image_components`.
+- Remove `node_drain_docker_registry` and `node_drain_docker_image` in favor of `node_drain_docker_image_components`.
+- Remove `remove_terminating_pods_docker_registry` and `remove_terminating_pods_docker_image` in favor of `remove_terminating_pods_docker_image_components`.
+
+### Migration
+
+- Replace top-level defaults with the map: `default_docker_image_components = { registry = "registry.k8s.io", repository = "kubectl", tag = "v1.33.5" }` (or your values).
+- Replace feature-specific overrides:
+  - working hours: `working_hours_docker_image_components = { registry = "...", repository = "...", tag = "..." }`
+  - node drain: `node_drain_docker_image_components = { ... }`
+  - remove terminating pods: `remove_terminating_pods_docker_image_components = { ... }`
+- Remove any use of the old string variables (`*_docker_registry`, `*_docker_image`, `default_docker_*`) from your module calls.
+- Example:
+
+  ```hcl
+  module "app_sleep_cycles" {
+    source = "..."
+
+    default_docker_image_components = {
+      registry   = "registry.k8s.io"
+      repository = "kubectl"
+      tag        = "v1.31.0"
+    }
+
+    working_hours_docker_image_components = {
+      repository = "kubectl"
+      tag        = "v1.31.1"
+    }
+
+    node_drain_docker_image_components = {
+      registry   = "myregistry.local"
+      repository = "custom/kubectl"
+      tag        = "v1.31.0"
+    }
+  }
+  ```
+
 ## [1.3.0] - 2025-08-07
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/1.2.0...1.3.0)

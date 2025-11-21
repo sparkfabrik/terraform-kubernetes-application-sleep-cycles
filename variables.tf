@@ -10,16 +10,18 @@ variable "namespace" {
   default     = "application-sleep-cycles"
 }
 
-variable "default_docker_registry" {
-  description = "Docker registry to use when the registry is not specified for the specific feature. Keep it empty to use the default registry (DockerHub)."
-  type        = string
-  default     = ""
-}
-
-variable "default_docker_image" {
-  description = "Docker image to use when the image is not specified for the specific feature."
-  type        = string
-  default     = "bitnamilegacy/kubectl:1.31"
+variable "default_docker_image_components" {
+  description = "Default Docker image parts map (registry, repository, tag) used for all CronJob containers when no feature-specific override is provided."
+  type = object({
+    registry   = string
+    repository = string
+    tag        = string
+  })
+  default = {
+    registry   = "registry.k8s.io"
+    repository = "kubectl"
+    tag        = "v1.33.5"
+  }
 }
 
 variable "default_node_affinity_match_expressions" {
@@ -171,16 +173,14 @@ variable "working_hours_resource_prefix" {
   default     = "application-sleep-cycles-working-hours"
 }
 
-variable "working_hours_docker_registry" {
-  description = "Docker registry to use for the working hours CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used."
-  type        = string
-  default     = ""
-}
-
-variable "working_hours_docker_image" {
-  description = "Docker image to use for the working hours CronJobs. If not specified (empty string), the `default_docker_image` variable will be used."
-  type        = string
-  default     = ""
+variable "working_hours_docker_image_components" {
+  description = "Override map for the working hours CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`."
+  type = object({
+    registry   = optional(string)
+    repository = optional(string)
+    tag        = optional(string)
+  })
+  default = {}
 }
 
 variable "working_hours_node_affinity_match_expressions" {
@@ -235,16 +235,14 @@ variable "node_drain_suspend" {
   default     = false
 }
 
-variable "node_drain_docker_registry" {
-  description = "Docker registry to use for the node drain CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used."
-  type        = string
-  default     = ""
-}
-
-variable "node_drain_docker_image" {
-  description = "Docker image to use for the node drain CronJob. If not specified (empty string), the `default_docker_image` variable will be used."
-  type        = string
-  default     = ""
+variable "node_drain_docker_image_components" {
+  description = "Override map for the node drain CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`."
+  type = object({
+    registry   = optional(string)
+    repository = optional(string)
+    tag        = optional(string)
+  })
+  default = {}
 }
 
 variable "node_drain_node_affinity_match_expressions" {
@@ -311,16 +309,14 @@ variable "remove_terminating_pods_suspend" {
   default     = false
 }
 
-variable "remove_terminating_pods_docker_registry" {
-  description = "Docker registry to use for the remove terminating pods CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used."
-  type        = string
-  default     = ""
-}
-
-variable "remove_terminating_pods_docker_image" {
-  description = "Docker image to use for the remove terminating pods CronJob. If not specified (empty string), the `default_docker_image` variable will be used."
-  type        = string
-  default     = ""
+variable "remove_terminating_pods_docker_image_components" {
+  description = "Override map for the remove terminating pods CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`."
+  type = object({
+    registry   = optional(string)
+    repository = optional(string)
+    tag        = optional(string)
+  })
+  default = {}
 }
 
 variable "remove_terminating_pods_node_affinity_match_expressions" {

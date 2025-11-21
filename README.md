@@ -19,7 +19,7 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.36.0 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.26 |
 
 ## Requirements
 
@@ -37,8 +37,7 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 | <a name="input_cluster_role_name_prefix"></a> [cluster\_role\_name\_prefix](#input\_cluster\_role\_name\_prefix) | Name of the cluster role. | `string` | `"custom:application-sleep-cycles:controller"` | no |
 | <a name="input_create_namespace"></a> [create\_namespace](#input\_create\_namespace) | Create namespace. If false, the namespace must be created before using this module. | `bool` | `true` | no |
 | <a name="input_default_cronjob_timezone"></a> [default\_cronjob\_timezone](#input\_default\_cronjob\_timezone) | Default timezone to use for the CronJobs. | `string` | `"Europe/Rome"` | no |
-| <a name="input_default_docker_image"></a> [default\_docker\_image](#input\_default\_docker\_image) | Docker image to use when the image is not specified for the specific feature. | `string` | `"bitnami/kubectl:1.31"` | no |
-| <a name="input_default_docker_registry"></a> [default\_docker\_registry](#input\_default\_docker\_registry) | Docker registry to use when the registry is not specified for the specific feature. Keep it empty to use the default registry (DockerHub). | `string` | `""` | no |
+| <a name="input_default_docker_image_components"></a> [default\_docker\_image\_components](#input\_default\_docker\_image\_components) | Default Docker image parts map (registry, repository, tag) used for all CronJob containers when no feature-specific override is provided. | <pre>object({<br/>    registry   = string<br/>    repository = string<br/>    tag        = string<br/>  })</pre> | <pre>{<br/>  "registry": "registry.k8s.io",<br/>  "repository": "kubectl",<br/>  "tag": "v1.33.5"<br/>}</pre> | no |
 | <a name="input_default_node_affinity_match_expressions"></a> [default\_node\_affinity\_match\_expressions](#input\_default\_node\_affinity\_match\_expressions) | List of match expressions to use for the node affinity when the node affinity is not specified for the specific feature. | <pre>list(object({<br/>    key      = string<br/>    operator = optional(string, "In")<br/>    values   = list(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_default_tolerations"></a> [default\_tolerations](#input\_default\_tolerations) | List of tolerations to use when the tolerations are not specified for the specific feature. | <pre>list(object({<br/>    key      = string<br/>    operator = string<br/>    value    = optional(string, null)<br/>    effect   = optional(string, null)<br/>  }))</pre> | `[]` | no |
 | <a name="input_k8s_additional_labels"></a> [k8s\_additional\_labels](#input\_k8s\_additional\_labels) | Set of additional labels to apply to all resources. | `map(string)` | `{}` | no |
@@ -47,8 +46,7 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 | <a name="input_node_drain_configmap_name_prefix"></a> [node\_drain\_configmap\_name\_prefix](#input\_node\_drain\_configmap\_name\_prefix) | Name prefix for the node drain ConfigMap. | `string` | `"application-sleep-cycles-drain-config"` | no |
 | <a name="input_node_drain_cronjob_schedule"></a> [node\_drain\_cronjob\_schedule](#input\_node\_drain\_cronjob\_schedule) | Cron schedule to drain the nodes. Remember that this is relative to the timezone defined in the `node_drain_cronjob_timezone` variable. | `string` | `"30 20-21 * * *"` | no |
 | <a name="input_node_drain_cronjob_timezone"></a> [node\_drain\_cronjob\_timezone](#input\_node\_drain\_cronjob\_timezone) | Timezone to use for the node drain CronJob. If not specified, the `default_cronjob_timezone` variable will be used. | `string` | `""` | no |
-| <a name="input_node_drain_docker_image"></a> [node\_drain\_docker\_image](#input\_node\_drain\_docker\_image) | Docker image to use for the node drain CronJob. If not specified (empty string), the `default_docker_image` variable will be used. | `string` | `""` | no |
-| <a name="input_node_drain_docker_registry"></a> [node\_drain\_docker\_registry](#input\_node\_drain\_docker\_registry) | Docker registry to use for the node drain CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used. | `string` | `""` | no |
+| <a name="input_node_drain_docker_image_components"></a> [node\_drain\_docker\_image\_components](#input\_node\_drain\_docker\_image\_components) | Override map for the node drain CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`. | <pre>object({<br/>    registry   = optional(string)<br/>    repository = optional(string)<br/>    tag        = optional(string)<br/>  })</pre> | `{}` | no |
 | <a name="input_node_drain_enabled"></a> [node\_drain\_enabled](#input\_node\_drain\_enabled) | Enable node drain feature. | `bool` | `false` | no |
 | <a name="input_node_drain_node_affinity_match_expressions"></a> [node\_drain\_node\_affinity\_match\_expressions](#input\_node\_drain\_node\_affinity\_match\_expressions) | List of match expressions to use for the node affinity of the node drain CronJobs. If not specified (empty list), the `default_node_affinity_match_expressions` variable will be used. | <pre>list(object({<br/>    key      = string<br/>    operator = optional(string, "In")<br/>    values   = list(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_node_drain_nodes_label_selector"></a> [node\_drain\_nodes\_label\_selector](#input\_node\_drain\_nodes\_label\_selector) | List of label selector for the nodes to be drained. | `list(map(string))` | `[]` | no |
@@ -59,8 +57,7 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 | <a name="input_remove_terminating_pods_configmap_name_prefix"></a> [remove\_terminating\_pods\_configmap\_name\_prefix](#input\_remove\_terminating\_pods\_configmap\_name\_prefix) | Name prefix for the remove terminating pods ConfigMap. | `string` | `"application-sleep-cycles-terminating-pods-config"` | no |
 | <a name="input_remove_terminating_pods_cronjob_schedule"></a> [remove\_terminating\_pods\_cronjob\_schedule](#input\_remove\_terminating\_pods\_cronjob\_schedule) | Cron schedule to remove terminating pods. Remember that this is relative to the timezone defined in the `remove_terminating_pods_cronjob_timezone` variable. | `string` | `"0 * * * *"` | no |
 | <a name="input_remove_terminating_pods_cronjob_timezone"></a> [remove\_terminating\_pods\_cronjob\_timezone](#input\_remove\_terminating\_pods\_cronjob\_timezone) | Timezone to use for the remove terminating pods CronJob. If not specified, the `default_cronjob_timezone` variable will be used. | `string` | `""` | no |
-| <a name="input_remove_terminating_pods_docker_image"></a> [remove\_terminating\_pods\_docker\_image](#input\_remove\_terminating\_pods\_docker\_image) | Docker image to use for the remove terminating pods CronJob. If not specified (empty string), the `default_docker_image` variable will be used. | `string` | `""` | no |
-| <a name="input_remove_terminating_pods_docker_registry"></a> [remove\_terminating\_pods\_docker\_registry](#input\_remove\_terminating\_pods\_docker\_registry) | Docker registry to use for the remove terminating pods CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used. | `string` | `""` | no |
+| <a name="input_remove_terminating_pods_docker_image_components"></a> [remove\_terminating\_pods\_docker\_image\_components](#input\_remove\_terminating\_pods\_docker\_image\_components) | Override map for the remove terminating pods CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`. | <pre>object({<br/>    registry   = optional(string)<br/>    repository = optional(string)<br/>    tag        = optional(string)<br/>  })</pre> | `{}` | no |
 | <a name="input_remove_terminating_pods_enabled"></a> [remove\_terminating\_pods\_enabled](#input\_remove\_terminating\_pods\_enabled) | Enable remove terminating pods feature. | `bool` | `false` | no |
 | <a name="input_remove_terminating_pods_node_affinity_match_expressions"></a> [remove\_terminating\_pods\_node\_affinity\_match\_expressions](#input\_remove\_terminating\_pods\_node\_affinity\_match\_expressions) | List of match expressions to use for the node affinity of the remove terminating pods CronJobs. If not specified (empty list), the `default_node_affinity_match_expressions` variable will be used. | <pre>list(object({<br/>    key      = string<br/>    operator = optional(string, "In")<br/>    values   = list(string)<br/>  }))</pre> | `[]` | no |
 | <a name="input_remove_terminating_pods_resource_prefix"></a> [remove\_terminating\_pods\_resource\_prefix](#input\_remove\_terminating\_pods\_resource\_prefix) | Prefix for the remove terminating pods resources. | `string` | `"application-sleep-cycles-terminating-pods"` | no |
@@ -72,8 +69,7 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 | <a name="input_working_hours_configmap_name_prefix"></a> [working\_hours\_configmap\_name\_prefix](#input\_working\_hours\_configmap\_name\_prefix) | Name prefix for the Config Maps. | `string` | `"application-sleep-cycles-config"` | no |
 | <a name="input_working_hours_cronjob_timezone"></a> [working\_hours\_cronjob\_timezone](#input\_working\_hours\_cronjob\_timezone) | Timezone to use for the cron jobs. If not specified, the `default_cronjob_timezone` variable will be used. | `string` | `""` | no |
 | <a name="input_working_hours_deployments_label_selector"></a> [working\_hours\_deployments\_label\_selector](#input\_working\_hours\_deployments\_label\_selector) | Label selector for the Deployments to be scaled during working-hours. | `map(string)` | <pre>{<br/>  "sparkfabrik.com/application-availability": "working-hours"<br/>}</pre> | no |
-| <a name="input_working_hours_docker_image"></a> [working\_hours\_docker\_image](#input\_working\_hours\_docker\_image) | Docker image to use for the working hours CronJobs. If not specified (empty string), the `default_docker_image` variable will be used. | `string` | `""` | no |
-| <a name="input_working_hours_docker_registry"></a> [working\_hours\_docker\_registry](#input\_working\_hours\_docker\_registry) | Docker registry to use for the working hours CronJobs. If not specified (empty string), the `default_docker_registry` variable will be used. | `string` | `""` | no |
+| <a name="input_working_hours_docker_image_components"></a> [working\_hours\_docker\_image\_components](#input\_working\_hours\_docker\_image\_components) | Override map for the working hours CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`. | <pre>object({<br/>    registry   = optional(string)<br/>    repository = optional(string)<br/>    tag        = optional(string)<br/>  })</pre> | `{}` | no |
 | <a name="input_working_hours_enabled"></a> [working\_hours\_enabled](#input\_working\_hours\_enabled) | Enable working hours feature. | `bool` | `true` | no |
 | <a name="input_working_hours_managed_namespaces"></a> [working\_hours\_managed\_namespaces](#input\_working\_hours\_managed\_namespaces) | List of namespaces where the controller should manage the scale of deployments. The namespaces defined here will be merged with the namespaces fetched by the `working_hours_managed_namespaces_label_selector` variable. | `list(string)` | `[]` | no |
 | <a name="input_working_hours_managed_namespaces_all_label_selector"></a> [working\_hours\_managed\_namespaces\_all\_label\_selector](#input\_working\_hours\_managed\_namespaces\_all\_label\_selector) | Label selector for all resources in the namespaces where the controller should manage the scale of deployments. The namespace must have `working_hours_managed_namespaces_label_selector` set. | `map(string)` | <pre>{<br/>  "sparkfabrik.com/application-availability": "working-hours"<br/>}</pre> | no |
@@ -120,3 +116,42 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 No modules.
 
 <!-- END_TF_DOCS -->
+
+### Docker image overrides
+
+The module builds final CronJob images by merging the per-feature maps (`*_docker_image_components`) with the defaults in `default_docker_image_components`. Any missing field (registry/repository/tag) falls back to the default value. Be careful when partially overriding, because inconsistent combinations are easy to create:
+
+- If you change only the repository but not the registry, you may accidentally pull from a registry that does not host that image (e.g., `registry.k8s.io/custom/kubectl:v1.31.0`).
+- If you change registry + repository but forget the tag, you may still pull the default tag while expecting a newer one.
+- If you change only the tag without changing the repository, you could point to a tag that does not exist in the default image.
+
+To avoid surprises, set all three fields together when overriding an image unless you are sure the defaults remain valid.
+
+#### Migrating from legacy image variables
+
+- Replace `default_docker_registry`, `default_docker_repository`, `default_docker_tag` with:
+
+```hcl
+module "sleep_cycles" {
+  source = "github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles?ref=1.3.0"
+
+  additional_protected_namespaces = var.application_sleep_cycles_additional_protected_namespaces
+  default_docker_registry         = "my-registry.io"
+  default_docker_repository       = "my-repo/kubectl"
+  default_docker_tag              = "v1.31.0"
+}
+```
+
+to
+
+```hcl
+module "sleep_cycles" {
+  source = "github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles?ref=1.4.0"
+  additional_protected_namespaces = var.application_sleep_cycles_additional_protected_namespaces
+  default_docker_image_components = {
+    registry   = "my-registry.io"
+    repository = "my-repo/kubectl"
+    tag        = "v1.31.0"
+  }
+}
+```
