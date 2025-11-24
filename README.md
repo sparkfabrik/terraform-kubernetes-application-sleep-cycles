@@ -146,7 +146,7 @@ to
 
 ```hcl
 module "sleep_cycles" {
-  source = "github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles?ref=1.4.0"
+  source = "github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles?ref=2.0.0"
   additional_protected_namespaces = var.application_sleep_cycles_additional_protected_namespaces
   default_docker_image = {
     registry   = "my-registry.io"
