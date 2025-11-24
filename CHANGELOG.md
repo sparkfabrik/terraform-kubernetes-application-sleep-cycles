@@ -25,7 +25,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Breaking
 
-- Remove the string trio `default_docker_registry`, `default_docker_repository`, `default_docker_tag` in favor of the map `default_docker_image = { registry, repository, tag }`.
+- Remove the string variables `default_docker_registry` and `default_docker_image` in favor of the map `default_docker_image = { registry, repository, tag }`.
 - Remove per-feature string overrides (`*_docker_registry`, `*_docker_image`) in favor of the per-feature maps (`working_hours_docker_image`, `node_drain_docker_image`, `remove_terminating_pods_docker_image`).
 
 ### Migration
