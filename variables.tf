@@ -10,7 +10,7 @@ variable "namespace" {
   default     = "application-sleep-cycles"
 }
 
-variable "default_docker_image_components" {
+variable "default_docker_image" {
   description = "Default Docker image parts map (registry, repository, tag) used for all CronJob containers when no feature-specific override is provided."
   type = object({
     registry   = string
@@ -173,8 +173,8 @@ variable "working_hours_resource_prefix" {
   default     = "application-sleep-cycles-working-hours"
 }
 
-variable "working_hours_docker_image_components" {
-  description = "Override map for the working hours CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`."
+variable "working_hours_docker_image" {
+  description = "Override map for the working hours CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image`."
   type = object({
     registry   = optional(string)
     repository = optional(string)
@@ -235,8 +235,8 @@ variable "node_drain_suspend" {
   default     = false
 }
 
-variable "node_drain_docker_image_components" {
-  description = "Override map for the node drain CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`."
+variable "node_drain_docker_image" {
+  description = "Override map for the node drain CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image`."
   type = object({
     registry   = optional(string)
     repository = optional(string)
@@ -309,8 +309,8 @@ variable "remove_terminating_pods_suspend" {
   default     = false
 }
 
-variable "remove_terminating_pods_docker_image_components" {
-  description = "Override map for the remove terminating pods CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image_components`."
+variable "remove_terminating_pods_docker_image" {
+  description = "Override map for the remove terminating pods CronJob Docker image parts. Any provided key (registry, repository, tag) will override `default_docker_image`."
   type = object({
     registry   = optional(string)
     repository = optional(string)

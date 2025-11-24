@@ -4,46 +4,15 @@ locals {
     var.k8s_additional_labels,
   )
 
-  # Resolve docker image parts per feature using the maps.
-  base_docker_image_parts = {
-    registry   = coalesce(try(var.default_docker_image_components.registry, null), "")
-    repository = coalesce(try(var.default_docker_image_components.repository, null), "")
-    tag        = coalesce(try(var.default_docker_image_components.tag, null), "")
-  }
+  # Final docker images map ({registry, repository, tag})
+  working_hours_final_docker_image_map           = merge(var.working_hours_docker_image, var.default_docker_image)
+  node_drain_final_docker_image_map              = merge(var.node_drain_docker_image, var.default_docker_image)
+  remove_terminating_pods_final_docker_image_map = merge(var.remove_terminating_pods_docker_image, var.default_docker_image)
 
-  docker_image_parts = {
-    working_hours = {
-      registry   = coalesce(try(var.working_hours_docker_image_components.registry, null), local.base_docker_image_parts.registry)
-      repository = coalesce(try(var.working_hours_docker_image_components.repository, null), local.base_docker_image_parts.repository)
-      tag        = coalesce(try(var.working_hours_docker_image_components.tag, null), local.base_docker_image_parts.tag)
-    }
-    node_drain = {
-      registry   = coalesce(try(var.node_drain_docker_image_components.registry, null), local.base_docker_image_parts.registry)
-      repository = coalesce(try(var.node_drain_docker_image_components.repository, null), local.base_docker_image_parts.repository)
-      tag        = coalesce(try(var.node_drain_docker_image_components.tag, null), local.base_docker_image_parts.tag)
-    }
-    remove_terminating_pods = {
-      registry   = coalesce(try(var.remove_terminating_pods_docker_image_components.registry, null), local.base_docker_image_parts.registry)
-      repository = coalesce(try(var.remove_terminating_pods_docker_image_components.repository, null), local.base_docker_image_parts.repository)
-      tag        = coalesce(try(var.remove_terminating_pods_docker_image_components.tag, null), local.base_docker_image_parts.tag)
-    }
-  }
-
-  # Construct the full docker image strings.
-  docker_images = {
-    for name, parts in local.docker_image_parts :
-    name => "${parts.repository}${parts.tag == "" ? "" : ":${parts.tag}"}"
-  }
-
-  docker_final_images = {
-    for name, parts in local.docker_image_parts :
-    name => parts.registry == "" ? local.docker_images[name] : "${parts.registry}${endswith(parts.registry, "/") ? "" : "/"}${local.docker_images[name]}"
-  }
-
-  # Final docker image to use for the features.
-  working_hours_final_docker_image           = local.docker_final_images["working_hours"]
-  node_drain_final_docker_image              = local.docker_final_images["node_drain"]
-  remove_terminating_pods_final_docker_image = local.docker_final_images["remove_terminating_pods"]
+  # Final docker images (string, e.g.: registry.k8s.io/kubectl:v1.33.5)
+  working_hours_final_docker_image           = "${local.working_hours_final_docker_image_map.registry}${endswith(local.working_hours_final_docker_image_map.registry, "/") ? "" : "/"}${local.working_hours_final_docker_image_map.repository}:${local.working_hours_final_docker_image_map.tag}"
+  node_drain_final_docker_image              = "${local.node_drain_final_docker_image_map.registry}${endswith(local.node_drain_final_docker_image_map.registry, "/") ? "" : "/"}${local.node_drain_final_docker_image_map.repository}:${local.node_drain_final_docker_image_map.tag}"
+  remove_terminating_pods_final_docker_image = "${local.remove_terminating_pods_final_docker_image_map.registry}${endswith(local.remove_terminating_pods_final_docker_image_map.registry, "/") ? "" : "/"}${local.remove_terminating_pods_final_docker_image_map.repository}:${local.remove_terminating_pods_final_docker_image_map.tag}"
 
   # Calculate the node affinity match expressions to use for the features.
   working_hours_node_affinity_match_expressions           = length(var.working_hours_node_affinity_match_expressions) > 0 ? var.working_hours_node_affinity_match_expressions : var.default_node_affinity_match_expressions
