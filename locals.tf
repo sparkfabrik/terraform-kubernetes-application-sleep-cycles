@@ -5,9 +5,9 @@ locals {
   )
 
   # Final docker images map ({registry, repository, tag})
-  working_hours_final_docker_image_map           = merge(var.working_hours_docker_image, var.default_docker_image)
-  node_drain_final_docker_image_map              = merge(var.node_drain_docker_image, var.default_docker_image)
-  remove_terminating_pods_final_docker_image_map = merge(var.remove_terminating_pods_docker_image, var.default_docker_image)
+  working_hours_final_docker_image_map           = merge(var.default_docker_image, { for k, v in var.working_hours_docker_image : k => v if v != null })
+  node_drain_final_docker_image_map              = merge(var.default_docker_image, { for k, v in var.node_drain_docker_image : k => v if v != null })
+  remove_terminating_pods_final_docker_image_map = merge(var.default_docker_image, { for k, v in var.remove_terminating_pods_docker_image : k => v if v != null })
 
   # Final docker images (string, e.g.: registry.k8s.io/kubectl:v1.33.5)
   working_hours_final_docker_image           = "${local.working_hours_final_docker_image_map.registry}${endswith(local.working_hours_final_docker_image_map.registry, "/") ? "" : "/"}${local.working_hours_final_docker_image_map.repository}:${local.working_hours_final_docker_image_map.tag}"

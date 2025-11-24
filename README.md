@@ -129,7 +129,7 @@ To avoid surprises, set all three fields together when overriding an image unles
 
 #### Migrating from legacy image variables
 
-- Replace `default_docker_registry`, `default_docker_repository`, `default_docker_tag` with:
+- The string variables `default_docker_registry`, `default_docker_repository`, `default_docker_tag` have been removed in favor of a single map `default_docker_image = { registry, repository, tag }`. Replace the old trio with:
 
 ```hcl
 module "sleep_cycles" {
@@ -153,5 +153,20 @@ module "sleep_cycles" {
     repository = "my-repo/kubectl"
     tag        = "v1.31.0"
   }
+}
+```
+
+- Per-feature string overrides (`working_hours_docker_registry`, `working_hours_docker_image`, `node_drain_docker_registry`, `node_drain_docker_image`, `remove_terminating_pods_docker_registry`, `remove_terminating_pods_docker_image`) are replaced by the corresponding maps:
+
+```hcl
+# old
+working_hours_docker_registry = "my-registry.io"
+working_hours_docker_image    = "my-repo/kubectl:v1.31.1"
+
+# new
+working_hours_docker_image = {
+  registry   = "my-registry.io"
+  repository = "my-repo/kubectl"
+  tag        = "v1.31.1"
 }
 ```

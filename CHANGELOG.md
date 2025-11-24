@@ -25,15 +25,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Breaking
 
-- Remove `default_docker_registry`, `default_docker_repository` and `default_docker_tag` in favor of `default_docker_image`.
-- Remove `working_hours_docker_registry` and `working_hours_docker_image` in favor of `working_hours_docker_image`.
-- Remove `node_drain_docker_registry` and `node_drain_docker_image` in favor of `node_drain_docker_image`.
-- Remove `remove_terminating_pods_docker_registry` and `remove_terminating_pods_docker_image` in favor of `remove_terminating_pods_docker_image`.
+- Remove the string trio `default_docker_registry`, `default_docker_repository`, `default_docker_tag` in favor of the map `default_docker_image = { registry, repository, tag }`.
+- Remove per-feature string overrides (`*_docker_registry`, `*_docker_image`) in favor of the per-feature maps (`working_hours_docker_image`, `node_drain_docker_image`, `remove_terminating_pods_docker_image`).
 
 ### Migration
 
-- Replace top-level defaults with the map: `default_docker_image = { registry = "registry.k8s.io", repository = "kubectl", tag = "v1.33.5" }` (or your values).
-- Replace feature-specific overrides:
+- Replace the old default string variables with the map: `default_docker_image = { registry = "registry.k8s.io", repository = "kubectl", tag = "v1.33.5" }` (or your values).
+- Replace feature-specific string overrides with maps:
   - working hours: `working_hours_docker_image = { registry = "...", repository = "...", tag = "..." }`
   - node drain: `node_drain_docker_image = { ... }`
   - remove terminating pods: `remove_terminating_pods_docker_image = { ... }`
