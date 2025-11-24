@@ -8,7 +8,7 @@ variable "working_hours_managed_namespaces" {
   description = "List of the namespaces where the application sleep cycles should manage the scale of deployments."
 }
 
-variable "default_docker_image_components" {
+variable "default_docker_image" {
   description = "Default Docker image parts map (registry, repository, tag)."
   type = object({
     registry   = optional(string)
@@ -17,7 +17,7 @@ variable "default_docker_image_components" {
   })
 }
 
-variable "working_hours_docker_image_components" {
+variable "working_hours_docker_image" {
   description = "Docker image parts override for working hours (registry, repository, tag)."
   type = object({
     registry   = optional(string)
@@ -27,7 +27,7 @@ variable "working_hours_docker_image_components" {
   default = {}
 }
 
-variable "node_drain_docker_image_components" {
+variable "node_drain_docker_image" {
   description = "Docker image parts override for node drain (registry, repository, tag)."
   type = object({
     registry   = optional(string)
@@ -37,7 +37,7 @@ variable "node_drain_docker_image_components" {
   default = {}
 }
 
-variable "remove_terminating_pods_docker_image_components" {
+variable "remove_terminating_pods_docker_image" {
   description = "Docker image parts override for remove terminating pods (registry, repository, tag)."
   type = object({
     registry   = optional(string)

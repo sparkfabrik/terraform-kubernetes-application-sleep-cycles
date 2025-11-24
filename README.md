@@ -19,7 +19,7 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 
 | Name | Version |
 |------|---------|
-| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | 2.36.0 |
+| <a name="provider_kubernetes"></a> [kubernetes](#provider\_kubernetes) | >= 2.26 |
 
 ## Requirements
 
@@ -119,7 +119,7 @@ No modules.
 
 ### Docker image overrides
 
-The module builds final CronJob images by merging the per-feature maps (`*_docker_image_components`) with the defaults in `default_docker_image_components`. Any missing field (registry/repository/tag) falls back to the default value. Be careful when partially overriding, because inconsistent combinations are easy to create:
+The module builds final CronJob images by merging the per-feature maps (`*_docker_image`) with the defaults in `default_docker_image`. Any missing field (registry/repository/tag) falls back to the default value. Be careful when partially overriding, because inconsistent combinations are easy to create:
 
 - If you change only the repository but not the registry, you may accidentally pull from a registry that does not host that image (e.g., `registry.k8s.io/custom/kubectl:v1.31.0`).
 - If you change registry + repository but forget the tag, you may still pull the default tag while expecting a newer one.
@@ -148,7 +148,7 @@ to
 module "sleep_cycles" {
   source = "github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles?ref=1.4.0"
   additional_protected_namespaces = var.application_sleep_cycles_additional_protected_namespaces
-  default_docker_image_components = {
+  default_docker_image = {
     registry   = "my-registry.io"
     repository = "my-repo/kubectl"
     tag        = "v1.31.0"
