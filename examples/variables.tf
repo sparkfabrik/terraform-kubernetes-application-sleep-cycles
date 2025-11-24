@@ -11,9 +11,9 @@ variable "working_hours_managed_namespaces" {
 variable "default_docker_image" {
   description = "Default Docker image parts map (registry, repository, tag)."
   type = object({
-    registry   = optional(string)
-    repository = optional(string)
-    tag        = optional(string)
+    registry   = string
+    repository = string
+    tag        = string
   })
 }
 
