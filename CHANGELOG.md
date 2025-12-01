@@ -8,6 +8,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.1.1] - 2025-12-05
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.1.0...2.1.1)
+
+- Make `default_docker_image` attributes optional so callers can omit fields (e.g., `tag`) and rely on the module defaults.
+
 ## [2.1.0] - 2025-12-01
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.0.0...2.1.0)

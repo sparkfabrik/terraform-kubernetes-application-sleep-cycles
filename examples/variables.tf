@@ -9,11 +9,11 @@ variable "working_hours_managed_namespaces" {
 }
 
 variable "default_docker_image" {
-  description = "Default Docker image parts map (registry, repository, tag)."
+  description = "Default Docker image parts map (registry, repository, tag). Missing attributes fall back to the module defaults."
   type = object({
-    registry   = string
-    repository = string
-    tag        = string
+    registry   = optional(string, "docker.io")
+    repository = optional(string, "alpine/kubectl")
+    tag        = optional(string, "1.33.4")
   })
 }
 

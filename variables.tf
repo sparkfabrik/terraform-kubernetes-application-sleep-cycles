@@ -11,17 +11,12 @@ variable "namespace" {
 }
 
 variable "default_docker_image" {
-  description = "Default Docker image parts map (registry, repository, tag) used for all CronJob containers when no feature-specific override is provided."
+  description = "Default Docker image parts map (registry, repository, tag) used for all CronJob containers when no feature-specific override is provided. Missing attributes fall back to the module defaults."
   type = object({
-    registry   = string
-    repository = string
-    tag        = string
+    registry   = optional(string, "docker.io")
+    repository = optional(string, "alpine/kubectl")
+    tag        = optional(string, "1.33.4")
   })
-  default = {
-    registry   = "docker.io"
-    repository = "alpine/kubectl"
-    tag        = "1.33.4"
-  }
 }
 
 variable "default_node_affinity_match_expressions" {
