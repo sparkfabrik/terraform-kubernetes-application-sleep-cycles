@@ -10,6 +10,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [2.1.0] - 2025-12-01
 
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.0.0...2.1.0)
+
 ### Changed
 
 - Switch default kubectl image to `docker.io/alpine/kubectl:1.33.4` because the previous distroless image lacked `/bin/sh` and could not run the bundled shell scripts.
