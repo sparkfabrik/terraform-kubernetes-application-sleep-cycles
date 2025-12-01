@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 DRY_RUN=${DRY_RUN:-0}
 NAMESPACES=${NAMESPACES:-}
@@ -17,11 +17,11 @@ filter_namespaces() {
   # NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}")
   # Without warnings:
   # NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}" 1)
-  local protected_namespaces="${1}"
-  local namespaces_to_filter="${2}"
-  local no_warning=${3:-0}
-  local filtered_namespaces="${namespaces_to_filter}"
-  local filtered_out=""
+  protected_namespaces="${1}"
+  namespaces_to_filter="${2}"
+  no_warning=${3:-0}
+  filtered_namespaces="${namespaces_to_filter}"
+  filtered_out=""
 
   for protected_ns in $(echo "${protected_namespaces}" | tr "," " "); do
     if echo "${filtered_namespaces}" | grep -q "${protected_ns}"; then
@@ -43,12 +43,12 @@ scale_resources() {
   # scale_resources -n "${KUBE_NAMESPACE}" -r deployment -l "${DEPLOYMENTS_LABEL_SELECTOR}" -t "${GO_TO_REPLICAS}" -d "${DRY_RUN}"
   OPTIND=1
 
-  local namespace=""
-  local resource_type=""
-  local label_selector=""
-  local target_replicas=1
-  local dry_run=0
-  local selector_arg=""
+  namespace=""
+  resource_type=""
+  label_selector=""
+  target_replicas=1
+  dry_run=0
+  selector_arg=""
 
   while getopts "n:r:l:t:d:" opt; do
     case $opt in

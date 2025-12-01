@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 DRY_RUN=${DRY_RUN:-0}
 NODES_LABEL_SELECTORS=${NODES_LABEL_SELECTORS:-}
@@ -10,7 +10,6 @@ fi
 
 # Function to drain nodes
 drain_nodes() {
-  local current_lbls
   for current_lbls in $(echo "${NODES_LABEL_SELECTORS}" | tr '|' ' '); do
     echo "Drain nodes matching label selector: ${current_lbls}"
     if [ "${DRY_RUN}" -eq "1" ]; then

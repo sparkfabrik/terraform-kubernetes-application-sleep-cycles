@@ -18,9 +18,9 @@ variable "default_docker_image" {
     tag        = string
   })
   default = {
-    registry   = "registry.k8s.io"
-    repository = "kubectl"
-    tag        = "v1.33.5"
+    registry   = "docker.io"
+    repository = "alpine/kubectl"
+    tag        = "1.33.4"
   }
 }
 
