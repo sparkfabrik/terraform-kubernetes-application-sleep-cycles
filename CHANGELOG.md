@@ -8,6 +8,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-12-01
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.0.0...2.1.0)
+
+### Changed
+
+- Switch default kubectl image to `docker.io/alpine/kubectl:1.33.4` because the previous distroless image lacked `/bin/sh` and could not run the bundled shell scripts.
+- Updated CronJob helper scripts (`working-hours.sh`, `node-drain.sh`, `remove-terminating-pods.sh`) to use `/bin/sh` and drop bash-specific constructs for compatibility with minimal images.
+
 ## [2.0.0] - 2025-11-24
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/1.3.0...2.0.0)

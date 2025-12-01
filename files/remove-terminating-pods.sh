@@ -1,12 +1,10 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 DRY_RUN=${DRY_RUN:-0}
 PROTECTED_NAMESPACES=${PROTECTED_NAMESPACES:-}
 
 # Function to remove pods stuck in terminating state
 remove_terminating_pods() {
-  local PODS POD POD_NAMESPACE POD_NAME
-
   PODS=$(kubectl get pod --all-namespaces | grep -i terminating | awk '{print $1","$2}')
   if [ -z "${PODS}" ]; then
     echo "No pods stuck in terminating state to remove."
