@@ -8,6 +8,18 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-16
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.1.1...2.2.0)
+
+### Added
+
+- Add `working_hours_excluded_namespaces_label_enabled` (default `true`) and `working_hours_excluded_namespaces_label` (default `sparkfabrik.com/always-on`) to exclude namespaces carrying the label from the working hours scale down/up, evaluated at runtime.
+
+### Changed
+
+- Match protected namespaces by exact name instead of by substring. Namespaces that were protected only because their name contains a protected entry are now scaled; add them to `additional_protected_namespaces` or label them with `sparkfabrik.com/always-on` before upgrading.
+
 ## [2.1.1] - 2025-12-05
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.1.0...2.1.1)

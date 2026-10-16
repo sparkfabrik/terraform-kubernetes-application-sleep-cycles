@@ -112,6 +112,23 @@ variable "working_hours_all_namespaces_excluded_resources_label_selector" {
   }
 }
 
+variable "working_hours_excluded_namespaces_label_enabled" {
+  description = "Enable the runtime exclusion of the namespaces carrying the `working_hours_excluded_namespaces_label` label. The label is evaluated at every CronJob run, so adding or removing it takes effect without a Terraform apply. It applies both when `working_hours_all_namespaces` is true and when it is false."
+  type        = bool
+  default     = true
+}
+
+variable "working_hours_excluded_namespaces_label" {
+  description = "Label key that excludes a namespace from the working hours scale down/up when `working_hours_excluded_namespaces_label_enabled` is true. Only the presence of the label is checked, its value is ignored."
+  type        = string
+  default     = "sparkfabrik.com/always-on"
+
+  validation {
+    condition     = can(regex("^([a-z0-9]([-a-z0-9.]*[a-z0-9])?/)?[A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?$", var.working_hours_excluded_namespaces_label))
+    error_message = "The working_hours_excluded_namespaces_label must be a valid Kubernetes label key (optional DNS prefix followed by a name)."
+  }
+}
+
 variable "working_hours_managed_namespaces" {
   description = "List of namespaces where the controller should manage the scale of deployments. The namespaces defined here will be merged with the namespaces fetched by the `working_hours_managed_namespaces_label_selector` variable."
   type        = list(string)

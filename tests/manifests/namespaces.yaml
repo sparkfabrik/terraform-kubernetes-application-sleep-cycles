@@ -28,3 +28,10 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: nginx-always-on
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx-namespace-always-on
+  labels:
+    sparkfabrik.com/always-on: "true"
