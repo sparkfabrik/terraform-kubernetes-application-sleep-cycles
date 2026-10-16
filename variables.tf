@@ -85,7 +85,7 @@ variable "protected_namespaces" {
   default     = ["kube-node-lease", "kube-public", "kube-system", "gmp-system", "gmp-public"]
 
   validation {
-    condition     = alltrue([for ns in var.protected_namespaces : can(regex("^[a-z0-9*?][-a-z0-9*?]*$", ns))])
+    condition     = alltrue([for ns in var.protected_namespaces : can(regex("^([a-z0-9*?][-a-z0-9*?]*)?$", ns))])
     error_message = "Each protected_namespaces entry must contain only lowercase letters, digits, '-' and the '*' or '?' wildcards."
   }
 }
@@ -96,7 +96,7 @@ variable "additional_protected_namespaces" {
   default     = []
 
   validation {
-    condition     = alltrue([for ns in var.additional_protected_namespaces : can(regex("^[a-z0-9*?][-a-z0-9*?]*$", ns))])
+    condition     = alltrue([for ns in var.additional_protected_namespaces : can(regex("^([a-z0-9*?][-a-z0-9*?]*)?$", ns))])
     error_message = "Each additional_protected_namespaces entry must contain only lowercase letters, digits, '-' and the '*' or '?' wildcards."
   }
 }
