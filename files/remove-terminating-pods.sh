@@ -3,6 +3,29 @@
 DRY_RUN=${DRY_RUN:-0}
 PROTECTED_NAMESPACES=${PROTECTED_NAMESPACES:-}
 
+# Protected entries are matched against the whole name, with "*" and "?" as
+# wildcards: a plain name matches only itself, "*foo*" matches any name containing "foo".
+is_protected_namespace() {
+  ns="${1}"
+  is_protected=1
+  set -f
+  for protected_ns in $(echo "${PROTECTED_NAMESPACES}" | tr "," " "); do
+    case "${protected_ns}" in
+    *\[* | *\]* | *\\*)
+      # Only "*" and "?" are wildcards: an entry with other glob characters matches literally.
+      [ "${ns}" = "${protected_ns}" ] && is_protected=0
+      ;;
+    *)
+      # shellcheck disable=SC2254 # The pattern is intentionally unquoted to allow globs.
+      case "${ns}" in ${protected_ns}) is_protected=0 ;; esac
+      ;;
+    esac
+    [ "${is_protected}" -eq 0 ] && break
+  done
+  set +f
+  return "${is_protected}"
+}
+
 # Function to remove pods stuck in terminating state
 remove_terminating_pods() {
   PODS=$(kubectl get pod --all-namespaces | grep -i terminating | awk '{print $1","$2}')
@@ -18,7 +41,7 @@ remove_terminating_pods() {
     echo "Removing pod in terminating state: ${POD_NAMESPACE}/${POD_NAME}"
 
     # Check if the namespace is protected
-    if [ -n "${PROTECTED_NAMESPACES}" ] && [[ ",${PROTECTED_NAMESPACES}," == *",${POD_NAMESPACE},"* ]]; then
+    if is_protected_namespace "${POD_NAMESPACE}"; then
       echo "Skipping pod ${POD_NAME} in protected namespace ${POD_NAMESPACE}"
       continue
     fi
