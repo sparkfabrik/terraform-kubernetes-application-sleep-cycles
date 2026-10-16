@@ -105,7 +105,7 @@ variable "working_hours_all_namespaces" {
 }
 
 variable "working_hours_all_namespaces_excluded_resources_label_selector" {
-  description = "Label selector used to exclude resources (deployments and statefulsets) which should not be scaled down/up when `working_hours_all_namespaces` is set to true. The negation of the label selector will be automatically applied, so using `sparkfabrik.com/always-on=true` will protect the resources with this label (`-l '!sparkfabrik.com/always-on=true'`). Use `null` as label value to consider only the label presence."
+  description = "Label selector used to exclude resources (deployments and statefulsets) which should not be scaled down/up when `working_hours_all_namespaces` is set to true. The negation of the label selector will be automatically applied, so using `sparkfabrik.com/always-on=true` will protect the resources with this label (`-l 'sparkfabrik.com/always-on!=true'`). Use `null` as label value to consider only the label presence."
   type        = map(string)
   default = {
     "sparkfabrik.com/always-on" : "true"

@@ -8,6 +8,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix the label selector built from `working_hours_all_namespaces_excluded_resources_label_selector` entries with a value, which the Kubernetes API rejected (`!key=value` instead of `key!=value`), so no resource was scaled when `working_hours_all_namespaces` was true.
+
 ## [2.2.0] - 2026-10-16
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.1.1...2.2.0)
