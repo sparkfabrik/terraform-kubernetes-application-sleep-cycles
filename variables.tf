@@ -80,15 +80,25 @@ variable "cluster_role_binding_name" {
 }
 
 variable "protected_namespaces" {
-  description = "List of namespaces where the controller should not manage the scale of deployments. Use additional_protected_namespaces to add custom protected namespaces."
+  description = "List of namespaces where the controller should not manage the scale of deployments. Each entry matches the whole namespace name and accepts the `*` (any characters) and `?` (exactly one character) wildcards, e.g. `*monitoring*`, `kube-*`, `*-prod` or `review-?`. Use additional_protected_namespaces to add custom protected namespaces."
   type        = list(string)
   default     = ["kube-node-lease", "kube-public", "kube-system", "gmp-system", "gmp-public"]
+
+  validation {
+    condition     = alltrue([for ns in var.protected_namespaces : can(regex("^[a-z0-9*?][-a-z0-9*?]*$", ns))])
+    error_message = "Each protected_namespaces entry must contain only lowercase letters, digits, '-' and the '*' or '?' wildcards."
+  }
 }
 
 variable "additional_protected_namespaces" {
-  description = "List of additional namespaces where the controller should not manage the scale of deployments."
+  description = "List of additional namespaces where the controller should not manage the scale of deployments. Each entry matches the whole namespace name and accepts the `*` (any characters) and `?` (exactly one character) wildcards, e.g. `*monitoring*`, `kube-*`, `*-prod` or `review-?`."
   type        = list(string)
   default     = []
+
+  validation {
+    condition     = alltrue([for ns in var.additional_protected_namespaces : can(regex("^[a-z0-9*?][-a-z0-9*?]*$", ns))])
+    error_message = "Each additional_protected_namespaces entry must contain only lowercase letters, digits, '-' and the '*' or '?' wildcards."
+  }
 }
 
 # Working hours feature

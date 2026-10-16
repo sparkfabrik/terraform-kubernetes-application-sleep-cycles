@@ -2,6 +2,26 @@
 
 This is a Terraform module to install a cron job on a Kubernetes cluster that uses the labels of application instances to perform a scale down to zero during predefined periods, thus reducing resource consumption, and then automatically restores the applications by scaling up at the end of the idle period.
 
+## Protected namespaces
+
+The CronJobs never scale or clean up workloads in the namespaces listed in `protected_namespaces` and `additional_protected_namespaces`. Each entry is matched against the whole namespace name and accepts two wildcards:
+
+- `*` matches any sequence of characters, including none.
+- `?` matches exactly one character.
+
+```hcl
+additional_protected_namespaces = [
+  "monitoring",   # only "monitoring"
+  "*monitoring*", # any namespace containing "monitoring", like "my-monitoring-eu"
+  "kube-*",       # any namespace starting with "kube-"
+  "*-prod",       # any namespace ending with "-prod"
+  "review-?",     # "review-1" or "review-a", not "review-12"
+  "app-??-prod",  # "app-eu-prod" or "app-us-prod", not "app-prod"
+]
+```
+
+To upgrade between versions, see [the upgrading guide](UPGRADING.md).
+
 ## Tests your scripts
 
 In the `Makefile.test` and in `tests` folder are present some helpers to create a [kind](https://kind.sigs.k8s.io/) cluster, deploy the Terraform module, deploy some test resources and run some tests.
@@ -32,7 +52,7 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_additional_protected_namespaces"></a> [additional\_protected\_namespaces](#input\_additional\_protected\_namespaces) | List of additional namespaces where the controller should not manage the scale of deployments. | `list(string)` | `[]` | no |
+| <a name="input_additional_protected_namespaces"></a> [additional\_protected\_namespaces](#input\_additional\_protected\_namespaces) | List of additional namespaces where the controller should not manage the scale of deployments. Each entry matches the whole namespace name and accepts the `*` (any characters) and `?` (exactly one character) wildcards, e.g. `*monitoring*`, `kube-*`, `*-prod` or `review-?`. | `list(string)` | `[]` | no |
 | <a name="input_cluster_role_binding_name"></a> [cluster\_role\_binding\_name](#input\_cluster\_role\_binding\_name) | Name of the cluster role binding. | `string` | `"custom:application-sleep-cycles:controller"` | no |
 | <a name="input_cluster_role_name_prefix"></a> [cluster\_role\_name\_prefix](#input\_cluster\_role\_name\_prefix) | Name of the cluster role. | `string` | `"custom:application-sleep-cycles:controller"` | no |
 | <a name="input_create_namespace"></a> [create\_namespace](#input\_create\_namespace) | Create namespace. If false, the namespace must be created before using this module. | `bool` | `true` | no |
@@ -53,7 +73,7 @@ In the `Makefile.test` and in `tests` folder are present some helpers to create 
 | <a name="input_node_drain_resource_prefix"></a> [node\_drain\_resource\_prefix](#input\_node\_drain\_resource\_prefix) | Prefix for the node drain resources. | `string` | `"application-sleep-cycles-drain"` | no |
 | <a name="input_node_drain_suspend"></a> [node\_drain\_suspend](#input\_node\_drain\_suspend) | Suspend the node drain CronJob. | `bool` | `false` | no |
 | <a name="input_node_drain_tolerations"></a> [node\_drain\_tolerations](#input\_node\_drain\_tolerations) | List of tolerations to use for the node drain CronJobs. If not specified (empty list), the `default_tolerations` variable will be used. | <pre>list(object({<br/>    key      = string<br/>    operator = string<br/>    value    = optional(string, null)<br/>    effect   = optional(string, null)<br/>  }))</pre> | `[]` | no |
-| <a name="input_protected_namespaces"></a> [protected\_namespaces](#input\_protected\_namespaces) | List of namespaces where the controller should not manage the scale of deployments. Use additional\_protected\_namespaces to add custom protected namespaces. | `list(string)` | <pre>[<br/>  "kube-node-lease",<br/>  "kube-public",<br/>  "kube-system",<br/>  "gmp-system",<br/>  "gmp-public"<br/>]</pre> | no |
+| <a name="input_protected_namespaces"></a> [protected\_namespaces](#input\_protected\_namespaces) | List of namespaces where the controller should not manage the scale of deployments. Each entry matches the whole namespace name and accepts the `*` (any characters) and `?` (exactly one character) wildcards, e.g. `*monitoring*`, `kube-*`, `*-prod` or `review-?`. Use additional\_protected\_namespaces to add custom protected namespaces. | `list(string)` | <pre>[<br/>  "kube-node-lease",<br/>  "kube-public",<br/>  "kube-system",<br/>  "gmp-system",<br/>  "gmp-public"<br/>]</pre> | no |
 | <a name="input_remove_terminating_pods_configmap_name_prefix"></a> [remove\_terminating\_pods\_configmap\_name\_prefix](#input\_remove\_terminating\_pods\_configmap\_name\_prefix) | Name prefix for the remove terminating pods ConfigMap. | `string` | `"application-sleep-cycles-terminating-pods-config"` | no |
 | <a name="input_remove_terminating_pods_cronjob_schedule"></a> [remove\_terminating\_pods\_cronjob\_schedule](#input\_remove\_terminating\_pods\_cronjob\_schedule) | Cron schedule to remove terminating pods. Remember that this is relative to the timezone defined in the `remove_terminating_pods_cronjob_timezone` variable. | `string` | `"0 * * * *"` | no |
 | <a name="input_remove_terminating_pods_cronjob_timezone"></a> [remove\_terminating\_pods\_cronjob\_timezone](#input\_remove\_terminating\_pods\_cronjob\_timezone) | Timezone to use for the remove terminating pods CronJob. If not specified, the `default_cronjob_timezone` variable will be used. | `string` | `""` | no |

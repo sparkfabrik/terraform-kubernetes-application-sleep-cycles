@@ -8,6 +8,17 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-16
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.2.0...2.3.0)
+
+No action required to upgrade. See [UPGRADING.md](UPGRADING.md#230) to restore the substring matching of protected namespaces.
+
+### Added
+
+- Support the `*` and `?` wildcards in `protected_namespaces` and `additional_protected_namespaces` entries, matched against the whole namespace name by the working hours and remove terminating pods CronJobs (e.g. `*monitoring*` protects every namespace containing `monitoring`).
+- Add `UPGRADING.md` with the upgrade steps and the required actions per version.
+
 ## [2.2.0] - 2026-10-16
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.1.1...2.2.0)
@@ -18,7 +29,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Changed
 
-- Match protected namespaces by exact name instead of by substring. Namespaces that were protected only because their name contains a protected entry are now scaled; add them to `additional_protected_namespaces` or label them with `sparkfabrik.com/always-on` before upgrading.
+- Match protected namespaces by exact name instead of by substring. Namespaces that were protected only because their name contains a protected entry are now scaled; add them to `additional_protected_namespaces` or label them with `sparkfabrik.com/always-on` before upgrading. See [UPGRADING.md](UPGRADING.md#220).
 
 ## [2.1.1] - 2025-12-05
 

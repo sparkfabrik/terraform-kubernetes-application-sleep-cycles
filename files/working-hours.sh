@@ -19,19 +19,26 @@ filter_namespaces() {
   # Without warnings:
   # NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}" 1)
   # Both lists accept comma or space separated names; the result is comma separated.
+  # Protected entries are shell glob patterns matched against the whole name:
+  # a plain name matches only itself, "*foo*" matches any name containing "foo".
   protected_namespaces="${1}"
   namespaces_to_filter="${2}"
   no_warning=${3:-0}
   filtered_namespaces=""
   filtered_out=""
 
+  # Disable pathname expansion so patterns are not expanded against local files.
+  set -f
   for ns in $(echo "${namespaces_to_filter}" | tr "," " "); do
     is_protected=0
     for protected_ns in $(echo "${protected_namespaces}" | tr "," " "); do
-      if [ "${ns}" = "${protected_ns}" ]; then
+      # shellcheck disable=SC2254 # The pattern is intentionally unquoted to allow globs.
+      case "${ns}" in
+      ${protected_ns})
         is_protected=1
         break
-      fi
+        ;;
+      esac
     done
     if [ "${is_protected}" -eq 1 ]; then
       filtered_out="${filtered_out}${ns},"
@@ -39,6 +46,7 @@ filter_namespaces() {
       filtered_namespaces="${filtered_namespaces}${ns},"
     fi
   done
+  set +f
   # Show warning if any namespaces were filtered out
   if [ -n "${filtered_out}" ] && [ "${no_warning}" -eq 0 ]; then
     filtered_out=${filtered_out%,} # Remove trailing comma
