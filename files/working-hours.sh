@@ -19,8 +19,8 @@ filter_namespaces() {
   # Without warnings:
   # NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}" 1)
   # Both lists accept comma or space separated names; the result is comma separated.
-  # Protected entries are shell glob patterns matched against the whole name:
-  # a plain name matches only itself, "*foo*" matches any name containing "foo".
+  # Protected entries are matched against the whole name, with "*" and "?" as
+  # wildcards: a plain name matches only itself, "*foo*" matches any name containing "foo".
   protected_namespaces="${1}"
   namespaces_to_filter="${2}"
   no_warning=${3:-0}
@@ -32,13 +32,17 @@ filter_namespaces() {
   for ns in $(echo "${namespaces_to_filter}" | tr "," " "); do
     is_protected=0
     for protected_ns in $(echo "${protected_namespaces}" | tr "," " "); do
-      # shellcheck disable=SC2254 # The pattern is intentionally unquoted to allow globs.
-      case "${ns}" in
-      ${protected_ns})
-        is_protected=1
-        break
+      case "${protected_ns}" in
+      *\[* | *\]* | *\\*)
+        # Only "*" and "?" are wildcards: an entry with other glob characters matches literally.
+        [ "${ns}" = "${protected_ns}" ] && is_protected=1
+        ;;
+      *)
+        # shellcheck disable=SC2254 # The pattern is intentionally unquoted to allow globs.
+        case "${ns}" in ${protected_ns}) is_protected=1 ;; esac
         ;;
       esac
+      [ "${is_protected}" -eq 1 ] && break
     done
     if [ "${is_protected}" -eq 1 ]; then
       filtered_out="${filtered_out}${ns},"

@@ -3,22 +3,27 @@
 DRY_RUN=${DRY_RUN:-0}
 PROTECTED_NAMESPACES=${PROTECTED_NAMESPACES:-}
 
-# Protected entries are shell glob patterns matched against the whole name:
-# a plain name matches only itself, "*foo*" matches any name containing "foo".
+# Protected entries are matched against the whole name, with "*" and "?" as
+# wildcards: a plain name matches only itself, "*foo*" matches any name containing "foo".
 is_protected_namespace() {
   ns="${1}"
+  is_protected=1
   set -f
   for protected_ns in $(echo "${PROTECTED_NAMESPACES}" | tr "," " "); do
-    # shellcheck disable=SC2254 # The pattern is intentionally unquoted to allow globs.
-    case "${ns}" in
-    ${protected_ns})
-      set +f
-      return 0
+    case "${protected_ns}" in
+    *\[* | *\]* | *\\*)
+      # Only "*" and "?" are wildcards: an entry with other glob characters matches literally.
+      [ "${ns}" = "${protected_ns}" ] && is_protected=0
+      ;;
+    *)
+      # shellcheck disable=SC2254 # The pattern is intentionally unquoted to allow globs.
+      case "${ns}" in ${protected_ns}) is_protected=0 ;; esac
       ;;
     esac
+    [ "${is_protected}" -eq 0 ] && break
   done
   set +f
-  return 1
+  return "${is_protected}"
 }
 
 # Function to remove pods stuck in terminating state

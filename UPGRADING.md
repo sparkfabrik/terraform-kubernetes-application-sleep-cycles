@@ -30,7 +30,7 @@ Entries in `protected_namespaces` and `additional_protected_namespaces` now acce
 | `review-?`     | `review-1`, `review-a`                         | `review-12`, `review-`           |
 | `app-??-prod`  | `app-eu-prod`, `app-us-prod`                   | `app-prod`, `app-eu1-prod`       |
 
-`*` matches any sequence of characters, including none. `?` matches exactly one character. Entries are validated at plan time: they may contain only lowercase letters, digits, `-`, `*` and `?`.
+`*` matches any sequence of characters, including none. `?` matches exactly one character. An entry that contains `[`, `]` or `\` is compared as a literal name, as before.
 
 ### Optional: restore the substring matching of versions before 2.2.0
 
