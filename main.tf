@@ -108,6 +108,7 @@ resource "kubernetes_config_map_v1" "app_env" {
     "STATEFULSETS_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_statefulsets_label_selector : v != null ? "${k}=${v}" : k]),
     "RUN_ON_ALL_NAMESPACES" : var.working_hours_all_namespaces ? "1" : "0",
     "RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR" : join(",", [for k, v in var.working_hours_all_namespaces_excluded_resources_label_selector : v != null ? "!${k}=${v}" : "!${k}"]),
+    "EXCLUDED_NAMESPACES_LABEL" : var.working_hours_excluded_namespaces_label_enabled ? var.working_hours_excluded_namespaces_label : "",
   }
 }
 

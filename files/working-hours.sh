@@ -10,6 +10,7 @@ STATEFULSETS_LABEL_SELECTOR=${STATEFULSETS_LABEL_SELECTOR:-}
 GO_TO_REPLICAS=${GO_TO_REPLICAS:-1}
 RUN_ON_ALL_NAMESPACES=${RUN_ON_ALL_NAMESPACES:-0}
 RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR=${RUN_ON_ALL_NAMESPACES_EXCLUDED_RESOURCES_LABEL_SELECTOR:-}
+EXCLUDED_NAMESPACES_LABEL=${EXCLUDED_NAMESPACES_LABEL:-}
 
 filter_namespaces() {
   # Usage examples:
@@ -17,16 +18,25 @@ filter_namespaces() {
   # NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}")
   # Without warnings:
   # NAMESPACES=$(filter_namespaces "${PROTECTED_NAMESPACES}" "${NAMESPACES}" 1)
+  # Both lists accept comma or space separated names; the result is comma separated.
   protected_namespaces="${1}"
   namespaces_to_filter="${2}"
   no_warning=${3:-0}
-  filtered_namespaces="${namespaces_to_filter}"
+  filtered_namespaces=""
   filtered_out=""
 
-  for protected_ns in $(echo "${protected_namespaces}" | tr "," " "); do
-    if echo "${filtered_namespaces}" | grep -q "${protected_ns}"; then
-      filtered_out="${filtered_out}${protected_ns},"
-      filtered_namespaces=$(echo "${filtered_namespaces}" | sed "s/${protected_ns}//g" | sed "s/,,/,/g" | sed "s/^,//" | sed "s/,$//")
+  for ns in $(echo "${namespaces_to_filter}" | tr "," " "); do
+    is_protected=0
+    for protected_ns in $(echo "${protected_namespaces}" | tr "," " "); do
+      if [ "${ns}" = "${protected_ns}" ]; then
+        is_protected=1
+        break
+      fi
+    done
+    if [ "${is_protected}" -eq 1 ]; then
+      filtered_out="${filtered_out}${ns},"
+    else
+      filtered_namespaces="${filtered_namespaces}${ns},"
     fi
   done
   # Show warning if any namespaces were filtered out
@@ -35,7 +45,7 @@ filter_namespaces() {
     echo "WARNING: Following namespaces were filtered out: ${filtered_out}" >&2
   fi
 
-  echo "${filtered_namespaces}"
+  echo "${filtered_namespaces%,}"
 }
 
 scale_resources() {
@@ -87,6 +97,20 @@ scale_resources() {
 
   return 0
 }
+
+# Namespaces carrying the exclusion label are added to the protected ones at
+# runtime, so they are never scaled regardless of how they were selected.
+if [ -n "${EXCLUDED_NAMESPACES_LABEL}" ]; then
+  if ! EXCLUDED_NAMESPACES=$(kubectl get namespaces -l "${EXCLUDED_NAMESPACES_LABEL}" -o jsonpath='{.items[*].metadata.name}'); then
+    echo "Error fetching namespaces with label ${EXCLUDED_NAMESPACES_LABEL}" >&2
+    exit 1
+  fi
+  if [ -n "${EXCLUDED_NAMESPACES}" ]; then
+    EXCLUDED_NAMESPACES=$(echo "${EXCLUDED_NAMESPACES}" | tr " " ",")
+    echo "Namespaces excluded by label ${EXCLUDED_NAMESPACES_LABEL}: ${EXCLUDED_NAMESPACES}"
+    PROTECTED_NAMESPACES="${PROTECTED_NAMESPACES:+${PROTECTED_NAMESPACES},}${EXCLUDED_NAMESPACES}"
+  fi
+fi
 
 if [ "${RUN_ON_ALL_NAMESPACES}" -eq "0" ]; then
   # The script is running only on the specified namespaces
