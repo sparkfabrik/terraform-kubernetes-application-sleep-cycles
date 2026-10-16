@@ -19,6 +19,10 @@ No action required to upgrade. See [UPGRADING.md](UPGRADING.md#230) to restore t
 - Support the `*` and `?` wildcards in `protected_namespaces` and `additional_protected_namespaces` entries, matched against the whole namespace name by the working hours and remove terminating pods CronJobs (e.g. `*monitoring*` protects every namespace containing `monitoring`).
 - Add `UPGRADING.md` with the upgrade steps and the required actions per version.
 
+### Fixed
+
+- Fix the label selector built from `working_hours_all_namespaces_excluded_resources_label_selector` entries with a value, which the Kubernetes API rejected (`!key=value` instead of `key!=value`), so no resource was scaled when `working_hours_all_namespaces` was true.
+
 ## [2.2.0] - 2026-10-16
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.1.1...2.2.0)
