@@ -8,6 +8,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-10-21
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.3.0...2.3.1)
+
 ### Fixed
 
 - Select only pods whose `STATUS` is `Terminating` in the remove terminating pods CronJob, so pods with "terminating" in their name (including the CronJob's own pods) are no longer deleted.
