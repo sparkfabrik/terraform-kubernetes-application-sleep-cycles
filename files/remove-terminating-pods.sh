@@ -28,12 +28,19 @@ is_protected_namespace() {
 
 # Function to remove pods stuck in terminating state
 remove_terminating_pods() {
-  PODS=$(kubectl get pod --all-namespaces | grep -i terminating | awk '{print $1","$2}')
+  if ! LIST=$(kubectl get pod --all-namespaces --no-headers); then
+    echo "Error listing pods" >&2
+    return 1
+  fi
+
+  # Select on the STATUS column only: a pod name may contain "terminating".
+  PODS=$(printf '%s\n' "${LIST}" | awk '$4 == "Terminating" {print $1","$2}')
   if [ -z "${PODS}" ]; then
     echo "No pods stuck in terminating state to remove."
     return 0
   fi
 
+  failed=0
   for POD in ${PODS}; do
     POD_NAMESPACE=$(echo "${POD}" | cut -d',' -f1)
     POD_NAME=$(echo "${POD}" | cut -d',' -f2)
@@ -48,12 +55,20 @@ remove_terminating_pods() {
 
     # Dry run option
     if [ "${DRY_RUN}" -eq "1" ]; then
-      echo "DRY-RUN: kubectl delete pod -n ${POD_NAMESPACE} --grace-period=0 --force --wait=false ${POD_NAME}"
+      echo "DRY-RUN: kubectl delete pod -n ${POD_NAMESPACE} --grace-period=0 --force --wait=false --ignore-not-found ${POD_NAME}"
       continue
     fi
 
-    kubectl delete pod -n "${POD_NAMESPACE}" --grace-period=0 --force --wait=false "${POD_NAME}"
+    if ! kubectl delete pod -n "${POD_NAMESPACE}" --grace-period=0 --force --wait=false --ignore-not-found "${POD_NAME}"; then
+      echo "Error removing pod ${POD_NAMESPACE}/${POD_NAME}" >&2
+      failed=1
+    fi
   done
+
+  if [ "${failed}" -ne 0 ]; then
+    echo "Some pods in terminating state could not be removed." >&2
+    return 1
+  fi
 
   echo "All pods in terminating state are removed."
 }
