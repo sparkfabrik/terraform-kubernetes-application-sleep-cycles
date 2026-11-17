@@ -225,7 +225,7 @@ variable "working_hours_suspend" {
 variable "working_hours_scale_down_schedule" {
   description = "Cron schedule to scale down the Deployments. Remember that this is relative to the timezone defined in the `cronjob_timezone` variable."
   type        = string
-  default     = "0 20 * * *"
+  default     = "0 22 * * *"
 }
 
 variable "working_hours_scale_up_schedule" {
@@ -287,7 +287,7 @@ variable "node_drain_resource_prefix" {
 variable "node_drain_cronjob_schedule" {
   description = "Cron schedule to drain the nodes. Remember that this is relative to the timezone defined in the `node_drain_cronjob_timezone` variable."
   type        = string
-  default     = "30 20-21 * * *"
+  default     = "30 22-23 * * *"
 }
 
 variable "node_drain_cronjob_timezone" {
