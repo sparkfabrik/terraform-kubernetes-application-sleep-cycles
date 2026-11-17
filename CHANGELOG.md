@@ -8,6 +8,17 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-11-17
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.3.1...2.4.0)
+
+Configurations that use the default schedules now scale down and drain the nodes two hours later. Set `working_hours_scale_down_schedule` and `node_drain_cronjob_schedule` to the previous values to keep them.
+
+### Changed
+
+- Change the default `working_hours_scale_down_schedule` from `0 20 * * *` to `0 22 * * *`.
+- Change the default `node_drain_cronjob_schedule` from `30 20-21 * * *` to `30 22-23 * * *`.
+
 ## [2.3.1] - 2026-10-21
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-kubernetes-application-sleep-cycles/compare/2.3.0...2.3.1)
